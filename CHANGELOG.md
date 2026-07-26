@@ -4,10 +4,10 @@
 
 First release.
 
-- **Noctilucent** — the dark variant. Editor background `#161523`, hue 243.
-- **Noctilucent Soft** — the ramp lifted about five points of lightness for bright rooms, accents
+- **Lagoon** — the dark variant. Editor background `#161523`, hue 243.
+- **Lagoon Soft** — the ramp lifted about five points of lightness for bright rooms, accents
   dropped to match.
-- **Noctilucent Dawn** — light variant, same hues with the value ramp inverted.
+- **Lagoon Dawn** — light variant, same hues with the value ramp inverted.
 
 Design notes:
 

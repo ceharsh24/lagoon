@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Noctilucent — palette source of truth.
+ * Lagoon — palette source of truth.
  *
  * Every colour is authored in HSL and converted to hex at build time. HSL keeps
  * the value ramps readable: the neutrals are one hue at descending saturation,
@@ -40,13 +40,13 @@ function mix(a, b, t) {
 }
 
 // ---------------------------------------------------------------------------
-// Noctilucent — the hero dark variant.
+// Lagoon — the hero dark variant.
 // ---------------------------------------------------------------------------
 // Chrome sits at hue 243 (indigo with a faint plum lean). Saturation falls as
 // lightness rises so the light end of the ramp reads as neutral text rather
 // than as tinted text.
 const dark = {
-  name: 'Noctilucent',
+  name: 'Lagoon',
   type: 'dark',
   neutrals: {
     crust: hsl(243, 30, 6.5),    // title bar, activity bar — the frame
@@ -74,12 +74,12 @@ const dark = {
 };
 
 // ---------------------------------------------------------------------------
-// Noctilucent Soft — same accents, background lifted for bright rooms.
+// Lagoon Soft — same accents, background lifted for bright rooms.
 // ---------------------------------------------------------------------------
 // The ramp is raised ~5 points of lightness. Accents drop ~4 points to hold
 // their contrast against the lighter base.
 const soft = {
-  name: 'Noctilucent Soft',
+  name: 'Lagoon Soft',
   type: 'dark',
   neutrals: {
     crust: hsl(243, 26, 11),
@@ -107,13 +107,13 @@ const soft = {
 };
 
 // ---------------------------------------------------------------------------
-// Noctilucent Dawn — the light variant.
+// Lagoon Dawn — the light variant.
 // ---------------------------------------------------------------------------
 // Same hues, inverted value ramp. Light backgrounds need the opposite accent
 // treatment: lightness drops well below 50% and saturation climbs, otherwise
 // pastels wash out to illegibility on white.
 const dawn = {
-  name: 'Noctilucent Dawn',
+  name: 'Lagoon Dawn',
   type: 'light',
   neutrals: {
     crust: hsl(240, 32, 92),

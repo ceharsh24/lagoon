@@ -1,17 +1,18 @@
 {
-  "name": "noctilucent",
-  "displayName": "Noctilucent",
-  "description": "A teal-on-twilight theme. Monochromatic indigo chrome, pastel split-complementary syntax, WCAG-audited contrast. Dark, Soft, and Dawn variants.",
+  "name": "lagoon",
+  "displayName": "Lagoon",
+  "description": "A teal-on-indigo theme. Monochromatic indigo chrome, pastel split-complementary syntax, WCAG-audited contrast. Dark, Soft, and Dawn variants.",
   "version": "1.0.0",
   "publisher": "ceharsh24",
   "license": "MIT",
-  "homepage": "https://ceharsh24.github.io/noctilucent/",
+  "icon": "icon.png",
+  "homepage": "https://ceharsh24.github.io/lagoon/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ceharsh24/noctilucent.git"
+    "url": "https://github.com/ceharsh24/lagoon.git"
   },
   "bugs": {
-    "url": "https://github.com/ceharsh24/noctilucent/issues"
+    "url": "https://github.com/ceharsh24/lagoon/issues"
   },
   "engines": {
     "vscode": "^1.70.0"
@@ -36,25 +37,26 @@
   "contributes": {
     "themes": [
       {
-        "label": "Noctilucent",
+        "label": "Lagoon",
         "uiTheme": "vs-dark",
-        "path": "./themes/noctilucent.json"
+        "path": "./themes/lagoon.json"
       },
       {
-        "label": "Noctilucent Soft",
+        "label": "Lagoon Soft",
         "uiTheme": "vs-dark",
-        "path": "./themes/noctilucent-soft.json"
+        "path": "./themes/lagoon-soft.json"
       },
       {
-        "label": "Noctilucent Dawn",
+        "label": "Lagoon Dawn",
         "uiTheme": "vs",
-        "path": "./themes/noctilucent-dawn.json"
+        "path": "./themes/lagoon-dawn.json"
       }
     ]
   },
   "scripts": {
-    "build": "node src/build.js",
+    "build": "node src/build.js && node src/icon.js && node src/preview.js",
     "check": "node src/build.js --check",
+    "icon": "node src/icon.js",
     "preview": "node src/preview.js"
   }
 }

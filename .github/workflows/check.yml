@@ -22,9 +22,12 @@ jobs:
 
       # The themes and the site are build output. If regenerating them changes
       # anything, the committed files are stale.
+      #
+      # The PNGs are deliberately not diffed: zlib's compressed output is not
+      # guaranteed byte-identical across platforms and versions, so comparing
+      # them would fail on the runner even when the pixels match.
       - name: Verify generated files are current
         run: |
           npm run build
-          npm run preview
-          git diff --exit-code -- themes docs \
-            || { echo "::error::themes/ or docs/ is out of date — run npm run build && npm run preview"; exit 1; }
+          git diff --exit-code -- themes docs/index.html \
+            || { echo "::error::themes/ or docs/index.html is out of date — run npm run build"; exit 1; }

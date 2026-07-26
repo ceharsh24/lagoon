@@ -1,13 +1,13 @@
-# Noctilucent
+# Lagoon
 
-A VS Code theme in three variants: **Noctilucent** (dark), **Noctilucent Soft** (dimmed dark),
-and **Noctilucent Dawn** (light).
+A VS Code theme in three variants: **Lagoon** (dark), **Lagoon Soft** (dimmed dark),
+and **Lagoon Dawn** (light).
 
-Noctilucent clouds sit higher than any others in the atmosphere. They catch sunlight long after
-the ground has gone dark and glow electric teal against a deep indigo sky. That is the palette:
-monochromatic twilight chrome, one luminous accent, pastel syntax that never raises its voice.
+A lagoon is the one place where water reads as two colours at once: luminous teal across the
+shallows, deep indigo where the floor drops away. That is the palette — monochromatic indigo
+chrome, one glowing teal accent, pastel syntax that never raises its voice.
 
-**[See the full specimen sheet →](https://ceharsh24.github.io/noctilucent/)**
+**[See the full specimen sheet →](https://ceharsh24.github.io/lagoon/)**
 
 ## Where the design came from
 
@@ -34,7 +34,7 @@ numbers, purple keywords, yellow types, blue functions. And the themes still gai
 Catppuccin and Tokyo Night, are the pastel ones. Saturation restraint is what people mean when
 they call a theme easy on the eyes; the loud themes sit much further down the list.
 
-Noctilucent keeps all of that and changes one thing.
+Lagoon keeps all of that and changes one thing.
 
 ## The palette
 
@@ -89,17 +89,17 @@ Current numbers, dark variant: body text 12.3:1, lowest accent 7.2:1, closest ac
 Clone straight into your extensions directory:
 
 ```bash
-git clone https://github.com/ceharsh24/noctilucent.git ~/.vscode/extensions/noctilucent
+git clone https://github.com/ceharsh24/lagoon.git ~/.vscode/extensions/lagoon
 ```
 
-Or grab the `.vsix` from the [latest release](https://github.com/ceharsh24/noctilucent/releases/latest):
+Or grab the `.vsix` from the [latest release](https://github.com/ceharsh24/lagoon/releases/latest):
 
 ```bash
-code --install-extension noctilucent-1.0.0.vsix
+code --install-extension lagoon-1.0.0.vsix
 ```
 
-Either way, restart VS Code, open the theme picker with `⌘K ⌘T`, and pick **Noctilucent**,
-**Noctilucent Soft**, or **Noctilucent Dawn**.
+Either way, restart VS Code, open the theme picker with `⌘K ⌘T`, and pick **Lagoon**,
+**Lagoon Soft**, or **Lagoon Dawn**.
 
 To publish to the VS Code marketplace, run `npx @vscode/vsce publish` with your own publisher ID.
 

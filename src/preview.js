@@ -7,7 +7,7 @@
  * The mock editor windows are painted from the same palette module the themes
  * are built from, so a preview can never show colours the theme does not ship.
  * The page chrome follows the viewer's light/dark preference by wearing the
- * theme itself: Dawn in light, Noctilucent in dark.
+ * theme itself: Dawn in light, Lagoon in dark.
  *
  *   node src/preview.js
  */
@@ -18,7 +18,7 @@ const { variants, alpha } = require('./palette');
 const { contrast, deltaE, level } = require('./contrast');
 
 const OUT = path.join(__dirname, '..', 'docs', 'index.html');
-const REPO = 'ceharsh24/noctilucent';
+const REPO = 'ceharsh24/lagoon';
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -130,7 +130,7 @@ const TREE = [
   { name: 'contrast.js', kind: 'file', git: 'U', depth: 1, active: true },
   { name: 'build.js', kind: 'file', depth: 1 },
   { name: 'themes', kind: 'folder', open: true },
-  { name: 'noctilucent.json', kind: 'file', git: 'A', depth: 1 },
+  { name: 'lagoon.json', kind: 'file', git: 'A', depth: 1 },
   { name: 'package.json', kind: 'file' },
   { name: 'README.md', kind: 'file' },
 ];
@@ -164,7 +164,7 @@ function renderWindow(variant, lines, id) {
   <div class="win" style="--crust:${n.crust};--mantle:${n.mantle};--base:${n.base};--surface1:${n.surface1};--text:${n.text};--muted:${n.muted};--subtle:${n.subtle};--bright:${n.bright};--teal:${a.teal}">
     <div class="titlebar">
       <span class="dots"><i></i><i></i><i></i></span>
-      <span class="title">noctilucent — src/contrast.ts</span>
+      <span class="title">lagoon — src/contrast.ts</span>
     </div>
     <div class="body">
       <nav class="activitybar" aria-hidden="true">
@@ -274,9 +274,27 @@ const S = variants.soft;
 const pair = closestPair(D);
 const minRatio = Math.min(...Object.values(D.accents).map((h) => contrast(h, D.neutrals.base)));
 
-const html = `<title>Noctilucent — a teal-on-twilight code theme</title>
+const DESCRIPTION =
+  'A teal-on-indigo VS Code theme in three variants. Monochromatic indigo chrome, ' +
+  'pastel split-complementary syntax, and contrast enforced at build time.';
+
+const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lagoon — a teal-on-indigo VS Code theme</title>
+<meta name="description" content="${DESCRIPTION}">
+<link rel="icon" type="image/png" href="icon.png">
+<meta name="theme-color" content="${D.neutrals.crust}" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="${L.neutrals.crust}" media="(prefers-color-scheme: light)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lagoon — a teal-on-indigo VS Code theme">
+<meta property="og:description" content="${DESCRIPTION}">
+<meta property="og:image" content="https://${REPO.split('/')[0]}.github.io/${REPO.split('/')[1]}/icon.png">
+<meta name="twitter:card" content="summary">
 <style>
-  /* Page tokens. Light wears Noctilucent Dawn, dark wears Noctilucent, so the
+  /* Page tokens. Light wears Lagoon Dawn, dark wears Lagoon, so the
      page is itself a specimen of the theme rather than a description of it. */
   :root {
     --ground: ${L.neutrals.crust};
@@ -350,7 +368,11 @@ const html = `<title>Noctilucent — a teal-on-twilight code theme</title>
   .prose { max-width: 64ch; }
 
   /* ---- Masthead ---- */
-  header { padding: clamp(56px, 10vw, 112px) 0 clamp(32px, 5vw, 56px); }
+  header { padding: clamp(48px, 9vw, 96px) 0 clamp(32px, 5vw, 56px); }
+  .mark {
+    display: block; width: 76px; height: 76px; border-radius: 17px;
+    margin: 0 0 26px; box-shadow: var(--shadow);
+  }
   .eyebrow {
     font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
     font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase;
@@ -391,7 +413,7 @@ const html = `<title>Noctilucent — a teal-on-twilight code theme</title>
   a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
   a:focus-visible, .win:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
-  /* ---- Hero glow: the noctilucent cloud, only visible at night ---- */
+  /* ---- Hero glow: the lagoon cloud, only visible at night ---- */
   .hero-specimen { position: relative; }
   .hero-specimen::before {
     content: ""; position: absolute; inset: -8% -4% 20%;
@@ -519,15 +541,18 @@ const html = `<title>Noctilucent — a teal-on-twilight code theme</title>
   }
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
+</head>
+<body>
 
 <header>
   <div class="wrap">
+    <img class="mark" src="icon.png" width="76" height="76" alt="Lagoon icon: two teal waves on an indigo ground">
     <p class="eyebrow">VS Code colour theme</p>
-    <h1>Noctilucent<span class="dim">.</span></h1>
-    <p class="lede prose">Noctilucent clouds are the highest in the atmosphere — they catch sunlight
-      long after the ground has gone dark, and glow electric teal against a deep indigo sky.
-      That is the whole palette: monochromatic twilight chrome, one luminous accent, and pastel
-      syntax that never raises its voice.</p>
+    <h1>Lagoon<span class="dim">.</span></h1>
+    <p class="lede prose">A lagoon is the one place where water reads as two colours at once:
+      luminous teal across the shallows, deep indigo where the floor drops away. That is the whole
+      palette — monochromatic indigo chrome, one glowing teal accent, and pastel syntax that never
+      raises its voice.</p>
     <p class="repo-link"><a href="https://github.com/${REPO}">github.com/${REPO}</a></p>
     <ul class="facts">
       <li>3 variants</li>
@@ -541,7 +566,7 @@ const html = `<title>Noctilucent — a teal-on-twilight code theme</title>
 
 <section style="border-top: none; padding-top: 0">
   <div class="wrap hero-specimen">
-    ${renderWindow(D, SAMPLE, 'noctilucent')}
+    ${renderWindow(D, SAMPLE, 'lagoon')}
   </div>
 </section>
 
@@ -559,7 +584,7 @@ const html = `<title>Noctilucent — a teal-on-twilight code theme</title>
         yellow types, blue functions. And the ones still climbing the charts — Catppuccin,
         Tokyo Night — are the pastel ones. Restraint is what people actually mean when they
         call a theme easy on the eyes.</p>
-      <p>Noctilucent keeps all of that and changes one thing. Functions and every piece of UI
+      <p>Lagoon keeps all of that and changes one thing. Functions and every piece of UI
         accent are <span style="color:${D.accents.teal};font-weight:600">teal</span> instead of
         blue, which sits split-complementary to the indigo ground — the pairing the ground was
         chosen for. Functions are the accent you see most often, so that single substitution
@@ -637,14 +662,14 @@ const html = `<title>Noctilucent — a teal-on-twilight code theme</title>
     <ol class="steps">
       <li>Clone into your extensions directory so VS Code picks it up on next launch.
         <pre>git clone https://github.com/${REPO}.git \\
-  ~/.vscode/extensions/noctilucent</pre></li>
+  ~/.vscode/extensions/lagoon</pre></li>
       <li>Restart VS Code, then open the theme picker with <code>⌘K ⌘T</code>.</li>
-      <li>Pick <strong>Noctilucent</strong>, <strong>Noctilucent Soft</strong>, or
-        <strong>Noctilucent Dawn</strong>.</li>
+      <li>Pick <strong>Lagoon</strong>, <strong>Lagoon Soft</strong>, or
+        <strong>Lagoon Dawn</strong>.</li>
     </ol>
     <p style="margin-top:22px">Prefer a packaged build? Grab the <code>.vsix</code> from the
       <a href="https://github.com/${REPO}/releases/latest">latest release</a> and run
-      <code>code --install-extension noctilucent-1.0.0.vsix</code>.</p>
+      <code>code --install-extension lagoon-1.0.0.vsix</code>.</p>
     <h3>Changing a colour</h3>
     <p class="prose">Edit the HSL values in <code>src/palette.js</code> and rebuild. The generated
       JSON in <code>themes/</code> is build output — editing it directly gets overwritten, and skips
@@ -656,11 +681,14 @@ npm run preview # regenerate this page</pre>
 
 <footer>
   <div class="wrap">
-    <p>Noctilucent · MIT · <a href="https://github.com/${REPO}">source</a> ·
+    <p>Lagoon · MIT · <a href="https://github.com/${REPO}">source</a> ·
       generated by <code>src/preview.js</code> from <code>src/palette.js</code> — the swatches and
       ratios on this page are read from the same palette the themes are built from.</p>
   </div>
 </footer>
+
+</body>
+</html>
 `;
 
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
