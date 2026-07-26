@@ -85,7 +85,13 @@
   }
 
   .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
-  .prose { max-width: 64ch; }
+  .prose { max-width: min(64ch, 100%); }
+
+  /* Grid and flex items default to min-width: auto, which means an unbreakable
+     string — a shell command, a long hex row — sets a floor under the track and
+     pushes the whole page sideways. Anything that can hold code needs an
+     explicit floor of zero so its own overflow container does the scrolling. */
+  .stack > *, ol.steps > li, .sw, .pane, .editor, pre, .scroll { min-width: 0; }
 
   /* ---- Masthead ---- */
   header { padding: clamp(48px, 9vw, 96px) 0 clamp(32px, 5vw, 56px); }
@@ -136,7 +142,9 @@
   /* ---- Hero glow: the lagoon cloud, only visible at night ---- */
   .hero-specimen { position: relative; }
   .hero-specimen::before {
-    content: ""; position: absolute; inset: -8% -4% 20%;
+    /* Horizontal inset stays at 0: the gradient fades out by 72% of the box, so
+       bleeding sideways adds nothing visible and does widen the scroll area. */
+    content: ""; position: absolute; inset: -8% 0 20%;
     background: radial-gradient(58% 52% at 50% 42%, var(--glow), transparent 72%);
     filter: blur(46px); pointer-events: none; z-index: 0;
   }
@@ -227,7 +235,7 @@
   .step-hex { font-size: 0.625rem; padding: 0 6px 8px; color: var(--ink-faint); }
 
   /* ---- Steps (a real sequence, hence the numbers) ---- */
-  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 22px; max-width: 68ch; }
+  ol.steps { counter-reset: s; list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 22px; max-width: min(68ch, 100%); }
   ol.steps li { counter-increment: s; padding-left: 44px; position: relative; }
   ol.steps li::before {
     content: counter(s); position: absolute; left: 0; top: 1px;
