@@ -1,9 +1,9 @@
 {
   "name": "lagoon",
   "displayName": "Lagoon",
-  "description": "A teal-on-indigo theme. Monochromatic indigo chrome, pastel split-complementary syntax, WCAG-audited contrast. Dark, Soft, and Dawn variants.",
+  "description": "A calm teal-on-indigo dark theme with dimmed and light variants. Pastel syntax, one-hue indigo UI, and every colour contrast-checked for long editing sessions.",
   "version": "1.0.0",
-  "publisher": "ceharsh24",
+  "publisher": "lagoon",
   "license": "MIT",
   "icon": "icon.png",
   "homepage": "https://ceharsh24.github.io/lagoon/",
@@ -28,6 +28,7 @@
     "teal",
     "indigo",
     "pastel",
+    "italic",
     "accessible"
   ],
   "galleryBanner": {

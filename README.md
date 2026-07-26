@@ -86,22 +86,48 @@ Current numbers, dark variant: body text 12.3:1, lowest accent 7.2:1, closest ac
 
 ## Install
 
-Clone straight into your extensions directory:
+**From the Extensions view** — press `⇧⌘X` (`Ctrl+Shift+X` on Windows and Linux), search for
+`Lagoon`, and click Install.
+
+**From the command line:**
 
 ```bash
-git clone https://github.com/ceharsh24/lagoon.git ~/.vscode/extensions/lagoon
+code --install-extension lagoon.lagoon
 ```
 
-Or grab the `.vsix` from the [latest release](https://github.com/ceharsh24/lagoon/releases/latest):
+**From a release build** — download `lagoon-1.0.0.vsix` from the
+[latest release](https://github.com/ceharsh24/lagoon/releases/latest), then:
 
 ```bash
 code --install-extension lagoon-1.0.0.vsix
 ```
 
-Either way, restart VS Code, open the theme picker with `⌘K ⌘T`, and pick **Lagoon**,
+**From source** — clone straight into your extensions directory:
+
+```bash
+git clone https://github.com/ceharsh24/lagoon.git ~/.vscode/extensions/lagoon
+```
+
+Then restart VS Code, open the theme picker with `⌘K ⌘T` (`Ctrl+K Ctrl+T`), and pick **Lagoon**,
 **Lagoon Soft**, or **Lagoon Dawn**.
 
-To publish to the VS Code marketplace, run `npx @vscode/vsce publish` with your own publisher ID.
+> If `code` is not a recognised command, run **Shell Command: Install 'code' command in PATH**
+> from the command palette (`⇧⌘P`) once, then reopen your terminal. The Extensions view and the
+> clone-from-source route both work without it.
+
+## Publishing a new version
+
+The extension is published under the `lagoon` publisher. `vsce` needs an Azure DevOps Personal
+Access Token with **Marketplace → Manage** scope, against **all accessible organizations**:
+
+```bash
+npx @vscode/vsce login lagoon     # paste the PAT once; stored in the system keychain
+npm run build                     # regenerate themes, icon, and site — and run the audit
+npx @vscode/vsce publish          # or: publish minor / publish patch to bump first
+```
+
+`vsce publish` refuses to publish a version that already exists, so bump `version` in
+`package.json` (or let `publish minor` do it) before republishing.
 
 ## Changing a colour
 

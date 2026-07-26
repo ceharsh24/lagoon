@@ -666,18 +666,18 @@ const html = `<!doctype html>
 <section>
   <div class="wrap">
     <p class="label">Install</p>
-    <h2>Three steps, no packaging required</h2>
+    <h2>Three steps</h2>
     <ol class="steps">
-      <li>Clone into your extensions directory so VS Code picks it up on next launch.
-        <pre>git clone https://github.com/${REPO}.git \\
-  ~/.vscode/extensions/lagoon</pre></li>
-      <li>Restart VS Code, then open the theme picker with <code>⌘K ⌘T</code>.</li>
+      <li>Open the Extensions view with <code>⇧⌘X</code>, search <strong>Lagoon</strong>, and click
+        Install. From a terminal instead:
+        <pre>code --install-extension lagoon.lagoon</pre></li>
+      <li>Open the theme picker with <code>⌘K ⌘T</code>.</li>
       <li>Pick <strong>Lagoon</strong>, <strong>Lagoon Soft</strong>, or
         <strong>Lagoon Dawn</strong>.</li>
     </ol>
-    <p style="margin-top:22px">Prefer a packaged build? Grab the <code>.vsix</code> from the
-      <a href="https://github.com/${REPO}/releases/latest">latest release</a> and run
-      <code>code --install-extension lagoon-1.0.0.vsix</code>.</p>
+    <p style="margin-top:22px">Prefer to build it yourself? Grab the <code>.vsix</code> from the
+      <a href="https://github.com/${REPO}/releases/latest">latest release</a>, or clone the repo
+      straight into <code>~/.vscode/extensions/lagoon</code> — no packaging step required.</p>
     <h3>Changing a colour</h3>
     <p class="prose">Edit the HSL values in <code>src/palette.js</code> and rebuild. The generated
       JSON in <code>themes/</code> is build output — editing it directly gets overwritten, and skips
