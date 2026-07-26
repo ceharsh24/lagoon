@@ -1,0 +1,60 @@
+{
+  "name": "noctilucent",
+  "displayName": "Noctilucent",
+  "description": "A teal-on-twilight theme. Monochromatic indigo chrome, pastel split-complementary syntax, WCAG-audited contrast. Dark, Soft, and Dawn variants.",
+  "version": "1.0.0",
+  "publisher": "ceharsh24",
+  "license": "MIT",
+  "homepage": "https://ceharsh24.github.io/noctilucent/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ceharsh24/noctilucent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ceharsh24/noctilucent/issues"
+  },
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "theme",
+    "color-theme",
+    "dark theme",
+    "light theme",
+    "teal",
+    "indigo",
+    "pastel",
+    "accessible"
+  ],
+  "galleryBanner": {
+    "color": "#161523",
+    "theme": "dark"
+  },
+  "contributes": {
+    "themes": [
+      {
+        "label": "Noctilucent",
+        "uiTheme": "vs-dark",
+        "path": "./themes/noctilucent.json"
+      },
+      {
+        "label": "Noctilucent Soft",
+        "uiTheme": "vs-dark",
+        "path": "./themes/noctilucent-soft.json"
+      },
+      {
+        "label": "Noctilucent Dawn",
+        "uiTheme": "vs",
+        "path": "./themes/noctilucent-dawn.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node src/build.js",
+    "check": "node src/build.js --check",
+    "preview": "node src/preview.js"
+  }
+}

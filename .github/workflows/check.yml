@@ -1,0 +1,30 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  contrast:
+    name: contrast audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Fails the build if any accent drops below its WCAG floor, or if two
+      # accents land close enough to be mistaken for each other.
+      - name: Audit palette contrast
+        run: npm run check
+
+      # The themes and the site are build output. If regenerating them changes
+      # anything, the committed files are stale.
+      - name: Verify generated files are current
+        run: |
+          npm run build
+          npm run preview
+          git diff --exit-code -- themes docs \
+            || { echo "::error::themes/ or docs/ is out of date — run npm run build && npm run preview"; exit 1; }

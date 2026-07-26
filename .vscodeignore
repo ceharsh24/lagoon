@@ -1,0 +1,9 @@
+# The generated themes/*.json are the extension. Everything that produces them,
+# and the site that documents them, stays out of the package.
+src/**
+docs/**
+node_modules/**
+.github/**
+.gitignore
+.vscodeignore
+CHANGELOG.md
