@@ -92,14 +92,14 @@ Current numbers, dark variant: body text 12.3:1, lowest accent 7.2:1, closest ac
 **From the command line:**
 
 ```bash
-code --install-extension lagoon.lagoon
+code --install-extension lagoon.lagoon-color-theme
 ```
 
-**From a release build** — download `lagoon-1.0.0.vsix` from the
+**From a release build** — download `lagoon-color-theme-1.0.0.vsix` from the
 [latest release](https://github.com/ceharsh24/lagoon/releases/latest), then:
 
 ```bash
-code --install-extension lagoon-1.0.0.vsix
+code --install-extension lagoon-color-theme-1.0.0.vsix
 ```
 
 **From source** — clone straight into your extensions directory:
