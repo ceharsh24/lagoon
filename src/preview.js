@@ -19,6 +19,11 @@ const { contrast, deltaE, level } = require('./contrast');
 
 const OUT = path.join(__dirname, '..', 'docs', 'index.html');
 const REPO = 'ceharsh24/lagoon';
+// Published identity. The slug is not "lagoon": the Marketplace reserves names
+// globally, including from extensions that are no longer listed, and both
+// "lagoon" and "lagoon-theme" were already gone.
+const EXT_ID = 'lagoon.lagoon-color-theme';
+const MARKETPLACE = `https://marketplace.visualstudio.com/items?itemName=${EXT_ID}`;
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -404,7 +409,9 @@ const html = `<!doctype html>
   .repo-link {
     font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
     font-size: 0.8125rem; margin: 28px 0 0;
+    display: flex; flex-wrap: wrap; gap: 0 12px;
   }
+  .repo-link .sep { color: var(--ink-faint); }
 
   /* ---- Sections ---- */
   section { padding: clamp(40px, 6vw, 72px) 0; border-top: 1px solid var(--rule); }
@@ -528,6 +535,9 @@ const html = `<!doctype html>
     background: var(--ground-alt); border: 1px solid var(--rule); border-radius: 8px;
     padding: 13px 16px; overflow-x: auto; font-size: 0.8125rem; margin: 12px 0 0;
     color: var(--ink);
+    /* Same measure as the prose column, so a three-line settings block does not
+       stretch across the full page width. */
+    max-width: min(72ch, 100%);
   }
 
   table { width: 100%; border-collapse: collapse; margin-top: 26px; font-size: 0.9375rem; }
@@ -561,7 +571,11 @@ const html = `<!doctype html>
       luminous teal across the shallows, deep indigo where the floor drops away. That is the whole
       palette — monochromatic indigo chrome, one glowing teal accent, and pastel syntax that never
       raises its voice.</p>
-    <p class="repo-link"><a href="https://github.com/${REPO}">github.com/${REPO}</a></p>
+    <p class="repo-link">
+      <a href="${MARKETPLACE}">Install from the Marketplace</a>
+      <span class="sep">·</span>
+      <a href="https://github.com/${REPO}">github.com/${REPO}</a>
+    </p>
     <ul class="facts">
       <li>3 variants</li>
       <li>chrome hue <b>243°</b>, one hue throughout</li>
@@ -668,22 +682,62 @@ const html = `<!doctype html>
     <p class="label">Install</p>
     <h2>Three steps</h2>
     <ol class="steps">
-      <li>Open the Extensions view with <code>⇧⌘X</code>, search <strong>Lagoon</strong>, and click
-        Install. From a terminal instead:
-        <pre>code --install-extension lagoon.lagoon-color-theme</pre></li>
-      <li>Open the theme picker with <code>⌘K ⌘T</code>.</li>
+      <li>Open the Extensions view with <code>⇧⌘X</code> (<code>Ctrl+Shift+X</code> on Windows and
+        Linux) and search <strong>Lagoon</strong>. It is listed as
+        <strong>Lagoon Color Theme</strong>, published by <strong>Lagoon</strong>. From a terminal
+        instead:
+        <pre>code --install-extension ${EXT_ID}</pre></li>
+      <li>Open the theme picker with <code>⌘K ⌘T</code> (<code>Ctrl+K Ctrl+T</code>).</li>
       <li>Pick <strong>Lagoon</strong>, <strong>Lagoon Soft</strong>, or
-        <strong>Lagoon Dawn</strong>.</li>
+        <strong>Lagoon Dawn</strong>. Arrow through the list to preview each one live before
+        committing.</li>
     </ol>
     <p style="margin-top:22px">Prefer to build it yourself? Grab the <code>.vsix</code> from the
       <a href="https://github.com/${REPO}/releases/latest">latest release</a>, or clone the repo
       straight into <code>~/.vscode/extensions/lagoon</code> — no packaging step required.</p>
+
+    <h3>Follow the system, dark to light</h3>
+    <p class="prose">Shipping a light variant is only useful if you never have to think about it.
+      Point VS Code at both and it will move between them when your OS does — Lagoon after dark,
+      Dawn in daylight.</p>
+    <pre>{
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredDarkColorTheme": "Lagoon",
+  "workbench.preferredLightColorTheme": "Lagoon Dawn"
+}</pre>
+    <p class="prose" style="margin-top:16px">To pin one instead, set it outright — this is what the
+      theme picker writes for you:</p>
+    <pre>{ "workbench.colorTheme": "Lagoon" }</pre>
+
+    <h3>If you don't want the italics</h3>
+    <p class="prose">Comments, control flow, parameters, and decorators are italic by design — it
+      separates them from the tokens around them without spending another colour. If your font
+      lacks a true italic, or you simply dislike them, override the styles rather than the theme:</p>
+    <pre>{
+  "editor.tokenColorCustomizations": {
+    "[Lagoon]": {
+      "textMateRules": [
+        {
+          "scope": ["comment", "keyword.control.flow", "variable.parameter"],
+          "settings": { "fontStyle": "" }
+        }
+      ]
+    }
+  }
+}</pre>
+
     <h3>Changing a colour</h3>
-    <p class="prose">Edit the HSL values in <code>src/palette.js</code> and rebuild. The generated
-      JSON in <code>themes/</code> is build output — editing it directly gets overwritten, and skips
-      the contrast gate.</p>
-    <pre>npm run build   # regenerate all three variants and audit them
-npm run preview # regenerate this page</pre>
+    <p class="prose">For a one-off tweak, scope it to the variant so your other themes are left
+      alone:</p>
+    <pre>{
+  "workbench.colorCustomizations": {
+    "[Lagoon]": { "editor.background": "#12111d" }
+  }
+}</pre>
+    <p class="prose" style="margin-top:16px">To change the palette itself, edit the HSL values in
+      <code>src/palette.js</code> and rebuild. The JSON in <code>themes/</code> is build output —
+      editing it directly gets overwritten, and skips the contrast gate.</p>
+    <pre>npm run build   # regenerate the three variants, the icon, and this page</pre>
   </div>
 </section>
 

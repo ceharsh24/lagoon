@@ -86,8 +86,8 @@ Current numbers, dark variant: body text 12.3:1, lowest accent 7.2:1, closest ac
 
 ## Install
 
-**From the Extensions view** — press `⇧⌘X` (`Ctrl+Shift+X` on Windows and Linux), search for
-`Lagoon`, and click Install.
+**From the Extensions view** — press `⇧⌘X` (`Ctrl+Shift+X` on Windows and Linux) and search
+`Lagoon`. It is listed as **Lagoon Color Theme**, published by **Lagoon**. Click Install.
 
 **From the command line:**
 
@@ -108,12 +108,98 @@ code --install-extension lagoon-color-theme-1.0.0.vsix
 git clone https://github.com/ceharsh24/lagoon.git ~/.vscode/extensions/lagoon
 ```
 
-Then restart VS Code, open the theme picker with `⌘K ⌘T` (`Ctrl+K Ctrl+T`), and pick **Lagoon**,
-**Lagoon Soft**, or **Lagoon Dawn**.
-
 > If `code` is not a recognised command, run **Shell Command: Install 'code' command in PATH**
 > from the command palette (`⇧⌘P`) once, then reopen your terminal. The Extensions view and the
 > clone-from-source route both work without it.
+
+## Using it
+
+### Pick a variant
+
+Open the theme picker with `⌘K ⌘T` (`Ctrl+K Ctrl+T`) and choose **Lagoon**, **Lagoon Soft**, or
+**Lagoon Dawn**. Arrow through the list to preview each one live before committing — nothing is
+saved until you press Enter.
+
+The picker writes this for you, so you can also set it by hand:
+
+```json
+{
+  "workbench.colorTheme": "Lagoon"
+}
+```
+
+| Variant | Use it when |
+| --- | --- |
+| **Lagoon** | the default — a dark room, or a screen you look at for hours |
+| **Lagoon Soft** | a bright room, where full contrast on near-black starts to glare |
+| **Lagoon Dawn** | daylight, projectors, and anything printed |
+
+### Follow the system, dark to light
+
+Shipping a light variant is only useful if you never have to think about it. Point VS Code at both
+and it will move between them when your OS does:
+
+```json
+{
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredDarkColorTheme": "Lagoon",
+  "workbench.preferredLightColorTheme": "Lagoon Dawn"
+}
+```
+
+Substitute `Lagoon Soft` for the dark entry if you work somewhere bright.
+
+### If you don't want the italics
+
+Comments, control flow, parameters, and decorators are italic by design — it separates them from
+surrounding tokens without spending another colour. If your editor font has no true italic, or you
+just dislike them, override the styles rather than editing the theme:
+
+```json
+{
+  "editor.tokenColorCustomizations": {
+    "[Lagoon]": {
+      "textMateRules": [
+        {
+          "scope": ["comment", "keyword.control.flow", "variable.parameter"],
+          "settings": { "fontStyle": "" }
+        }
+      ]
+    }
+  }
+}
+```
+
+Scoping the block to `[Lagoon]` keeps the change from leaking into your other themes. Repeat it for
+`[Lagoon Soft]` and `[Lagoon Dawn]` if you switch between them.
+
+### Override a single colour
+
+```json
+{
+  "workbench.colorCustomizations": {
+    "[Lagoon]": {
+      "editor.background": "#12111d"
+    }
+  }
+}
+```
+
+Any key from the [theme colour reference](https://code.visualstudio.com/api/references/theme-color)
+works here. To change the palette wholesale rather than patch it, see
+[Changing a colour](#changing-a-colour) below and rebuild from source.
+
+### Semantic highlighting
+
+The theme maps semantic tokens as well as TextMate scopes, and the two agree with each other, so an
+identifier does not change colour when a language server finishes loading. It is on by default;
+if you have turned it off globally, this restores it:
+
+```json
+{
+  "editor.semanticHighlighting.enabled": true
+}
+```
 
 ## Publishing a new version
 
