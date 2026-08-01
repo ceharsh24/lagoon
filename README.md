@@ -58,16 +58,23 @@ feels like.
 
 | Role | Colour | Dark | Dawn |
 | --- | --- | --- | --- |
-| Functions, methods, decorators, UI accent | teal | `#67e0cc` | `#187770` |
-| Properties, object keys, tag attributes | sky | `#82c4f3` | `#136eae` |
-| Keywords, control flow, storage | lavender | `#b49df0` | `#5d36c9` |
-| Imports, language constants, regex | orchid | `#e891c8` | `#a92d7c` |
-| Errors, invalid, `this`, HTML tags | rose | `#f08496` | `#c32243` |
-| Numbers, constants, enum members | apricot | `#f6ab79` | `#b85014` |
-| Types, classes, interfaces | amber | `#f2d178` | `#99670f` |
-| Strings | green | `#89d193` | `#297a39` |
-| Comments | muted, italic | `#817cab` | `#6d6996` |
+| Functions, methods, decorators, UI accent | teal | `#4dccb8` | `#087970` |
+| Properties, object keys, tag attributes | sky | `#69b7ed` | `#126aa4` |
+| Keywords, control flow, storage | lavender | `#bda6f6` | `#6b58ad` |
+| Imports, language constants, regex | orchid | `#dd8ec7` | `#933f74` |
+| `this` / self, HTML tags, markdown lists | rose | `#f495a1` | `#a74955` |
+| Numbers, constants, enum members | apricot | `#eda26a` | `#a8572d` |
+| Types, classes, interfaces | amber | `#d1b157` | `#856103` |
+| Strings | green | `#80c182` | `#33753d` |
+| Errors, invalid, deletions | red | `#e76761` | `#a01819` |
+| Comments, ghost text | muted, italic | `#817cab` | `#6d6996` |
 | Punctuation, operators, parameters | subtle | `#9d9bbf` | `#575676` |
+
+Accents are authored in OKLCH and share one perceptual lightness band per variant
+(±1.5 L), so no token glows above another — hue carries the meaning, brightness
+stays flat. Red is a state, not a syntax colour: it sits below the band and gets
+its urgency from chroma, so error squiggles read as errors and nothing else
+borrows their colour.
 
 ## Contrast is enforced, not eyeballed
 
@@ -81,8 +88,13 @@ feels like.
   against the background.
 - No two accents may land closer than **ΔE 22** (CIE76). Two syntax roles that look like the same
   colour are worse than an ugly palette.
+- Accents also have a **ceiling**: none may be brighter than body text, and the brightest accent
+  may exceed the dimmest by at most **1.35×**. A floor alone lets one token glow above the rest,
+  and uneven glow is what makes a theme tiring over hours.
+- The `faint` step (line numbers, active indent guide) must clear **3:1** — quiet, but readable
+  without leaning in.
 
-Current numbers, dark variant: body text 12.3:1, lowest accent 7.2:1, closest accent pair ΔE 24.
+Current numbers, dark variant: body text 12.3:1, accents 7.5–9.1:1, closest accent pair ΔE 23.
 
 ## Install
 
@@ -151,7 +163,7 @@ Substitute `Lagoon Soft` for the dark entry if you work somewhere bright.
 
 ### If you don't want the italics
 
-Comments, control flow, parameters, and decorators are italic by design — it separates them from
+Comments, parameters, and decorators are italic by design — it separates them from
 surrounding tokens without spending another colour. If your editor font has no true italic, or you
 just dislike them, override the styles rather than editing the theme:
 
@@ -217,9 +229,10 @@ npx @vscode/vsce publish          # or: publish minor / publish patch to bump fi
 
 ## Changing a colour
 
-Colours live in `src/palette.js`, authored in HSL so the value ramps stay legible. Edit there and
-rebuild — the JSON in `themes/` is build output, and editing it directly both gets overwritten and
-skips the contrast gate.
+Colours live in `src/palette.js` — neutrals in HSL so the value ramps stay legible, accents in
+OKLCH so equal perceptual brightness is guaranteed by the numbers. Edit there and rebuild — the
+JSON in `themes/` is build output, and editing it directly both gets overwritten and skips the
+contrast gate.
 
 ```bash
 npm run build     # regenerate all three variants and audit them
@@ -229,7 +242,7 @@ npm run preview   # regenerate docs/index.html
 
 | File | What it holds |
 | --- | --- |
-| `src/palette.js` | the three variants, in HSL |
+| `src/palette.js` | the three variants — neutrals in HSL, accents in OKLCH |
 | `src/theme.js` | role assignments — which token gets which colour, ~350 UI keys |
 | `src/contrast.js` | WCAG contrast and CIELAB ΔE |
 | `src/build.js` | generates `themes/*.json`, runs the audit |

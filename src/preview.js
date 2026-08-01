@@ -74,10 +74,10 @@ function roleStyle(variant, role) {
     pun: [n.subtle, ''],
     op: [n.subtle, ''],
     param: [n.subtle, 'italic'],
-    self: [a.rose, 'italic'],
+    self: [a.rose, ''],
     kw: [a.lavender, ''],
-    ctl: [a.lavender, 'italic'],
-    imp: [a.orchid, 'italic'],
+    ctl: [a.lavender, ''],
+    imp: [a.orchid, ''],
     bool: [a.orchid, ''],
     esc: [a.apricot, ''],
     num: [a.apricot, ''],
@@ -142,7 +142,7 @@ const TREE = [
 
 function renderTree(variant) {
   const { neutrals: n, accents: a } = variant;
-  const gitColor = { M: a.amber, A: a.green, U: a.sky, D: a.rose };
+  const gitColor = { M: a.amber, A: a.green, U: a.sky, D: variant.states.red };
   return TREE.map((item) => {
     const isFolder = item.kind === 'folder';
     const color = item.git ? gitColor[item.git] : isFolder ? n.text : n.subtle;
@@ -196,7 +196,7 @@ function renderWindow(variant, lines, id) {
     <div class="statusbar">
       <span style="color:${a.teal}">⎇ main</span>
       <span style="color:${n.subtle}">↑2 ↓0</span>
-      <span style="color:${a.rose}">✕ 0</span>
+      <span style="color:${variant.states.red}">✕ 0</span>
       <span style="color:${a.amber}">⚠ 1</span>
       <span class="spacer"></span>
       <span style="color:${n.subtle}">Ln ${ACTIVE_LINE}, Col 34</span>
@@ -221,16 +221,17 @@ const ROLE_NOTES = {
   sky: 'properties, object keys, tag attributes',
   lavender: 'keywords, control flow, storage modifiers',
   orchid: 'imports, language constants, regex, CSS variables',
-  rose: 'errors, invalid, this / self, HTML tags',
+  rose: 'this / self, HTML tags, markdown lists',
   apricot: 'numbers, constants, enum members, escapes',
   amber: 'types, classes, interfaces, namespaces',
   green: 'strings',
+  red: 'errors, invalid, deletions — red means broken, nothing else',
 };
 
 function renderSwatches(variant) {
-  const { neutrals: n, accents: a } = variant;
+  const { neutrals: n, accents: a, states: st } = variant;
   const bg = n.base;
-  const rows = Object.entries(a).map(([name, hex]) => {
+  const rows = Object.entries({ ...a, ...st }).map(([name, hex]) => {
     const ratio = contrast(hex, bg);
     return `
     <div class="sw">
@@ -251,7 +252,7 @@ function renderSwatches(variant) {
 
 function renderRamp(variant) {
   const { neutrals: n } = variant;
-  const order = ['crust', 'mantle', 'base', 'elevated', 'surface0', 'surface1', 'surface2', 'muted', 'subtle', 'text', 'bright'];
+  const order = ['crust', 'mantle', 'base', 'elevated', 'surface0', 'surface1', 'surface2', 'faint', 'muted', 'subtle', 'text', 'bright'];
   return order
     .map((k) => `<div class="step"><span class="step-fill" style="background:${n[k]}"></span><span class="mono step-label">${k}</span><span class="mono step-hex">${n[k]}</span></div>`)
     .join('');
@@ -618,10 +619,14 @@ const html = `<!doctype html>
 <section>
   <div class="wrap">
     <p class="label">Accents</p>
-    <h2>Eight hues, each doing one job</h2>
+    <h2>Eight hues and one red, each doing one job</h2>
     <p class="prose">Ratios are measured against the editor background. The build refuses to emit a
       theme if any accent drops below 4.5:1, or if any two accents land closer than ΔE 22 —
-      close enough that two different roles would start to look like the same colour.</p>
+      close enough that two different roles would start to look like the same colour. The eight
+      syntax hues are authored in OKLCH and share one perceptual lightness band: none may outshine
+      body text, and the brightest may exceed the dimmest by at most 1.35×. Red sits outside the
+      band on purpose — it marks broken code and nothing else, urgent through saturation rather
+      than glow.</p>
     ${`<div class="swatches">${renderSwatches(D)}</div>`}
   </div>
 </section>
@@ -710,7 +715,7 @@ const html = `<!doctype html>
     <pre>{ "workbench.colorTheme": "Lagoon" }</pre>
 
     <h3>If you don't want the italics</h3>
-    <p class="prose">Comments, control flow, parameters, and decorators are italic by design — it
+    <p class="prose">Comments, parameters, and decorators are italic by design — it
       separates them from the tokens around them without spending another colour. If your font
       lacks a true italic, or you simply dislike them, override the styles rather than the theme:</p>
     <pre>{
@@ -734,9 +739,10 @@ const html = `<!doctype html>
     "[Lagoon]": { "editor.background": "#12111d" }
   }
 }</pre>
-    <p class="prose" style="margin-top:16px">To change the palette itself, edit the HSL values in
-      <code>src/palette.js</code> and rebuild. The JSON in <code>themes/</code> is build output —
-      editing it directly gets overwritten, and skips the contrast gate.</p>
+    <p class="prose" style="margin-top:16px">To change the palette itself, edit the values in
+      <code>src/palette.js</code> — neutrals in HSL, accents in OKLCH — and rebuild. The JSON in
+      <code>themes/</code> is build output — editing it directly gets overwritten, and skips the
+      contrast gate.</p>
     <pre>npm run build   # regenerate the three variants, the icon, and this page</pre>
   </div>
 </section>

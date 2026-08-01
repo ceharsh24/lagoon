@@ -3,15 +3,19 @@
 /**
  * Lagoon — palette source of truth.
  *
- * Every colour is authored in HSL and converted to hex at build time. HSL keeps
- * the value ramps readable: the neutrals are one hue at descending saturation,
- * so "is surface1 lighter than surface0" is answerable by looking at the numbers
- * instead of by squinting at hex.
+ * Neutrals are authored in HSL and accents in OKLCH, both converted to hex at
+ * build time. HSL keeps the value ramps readable: the neutrals are one hue at
+ * descending saturation, so "is surface1 lighter than surface0" is answerable
+ * by looking at the numbers. Accents use OKLCH because HSL lightness is not
+ * perceptual — at the same HSL L, yellow glows and violet recedes. Authoring
+ * accent L in OKLCH makes "every accent is equally bright" true by
+ * construction, which is what keeps the page calm: on a dark ground,
+ * brightness is salience, and uneven salience is what reads as strain.
  *
  * Structure of a variant:
  *   neutrals  — monochromatic chrome ramp, darkest (crust) to lightest (bright)
- *   accents   — the syntax hues
- *   git/diff  — states that need their own tuning against the background
+ *   accents   — the syntax hues, one OKLCH lightness band per variant
+ *   states    — diagnostics colours allowed outside the band (they should pop)
  */
 
 /** HSL (h 0-360, s 0-100, l 0-100) to #rrggbb. */
@@ -23,6 +27,31 @@ function hsl(h, s, l) {
   const f = (n) => L - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
   const to255 = (v) => Math.round(255 * v).toString(16).padStart(2, '0');
   return `#${to255(f(0))}${to255(f(8))}${to255(f(4))}`;
+}
+
+/** OKLCH (L 0-100, C, h 0-360) to #rrggbb, chroma clamped into sRGB gamut. */
+function oklch(L, C, h) {
+  const toRgb = (c) => {
+    const rad = (h * Math.PI) / 180;
+    const A = c * Math.cos(rad);
+    const B = c * Math.sin(rad);
+    const l_ = L / 100 + 0.3963377774 * A + 0.2158037573 * B;
+    const m_ = L / 100 - 0.1055613458 * A - 0.0638541728 * B;
+    const s_ = L / 100 - 0.0894841775 * A - 1.291485548 * B;
+    const [l, m, s] = [l_ ** 3, m_ ** 3, s_ ** 3];
+    return [
+      4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+      -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+      -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+    ];
+  };
+  let c = C;
+  while (c > 0 && !toRgb(c).every((v) => v >= -1e-4 && v <= 1 + 1e-4)) c -= 0.001;
+  const gamma = (v) => {
+    const x = Math.min(1, Math.max(0, v));
+    return x <= 0.0031308 ? x * 12.92 : 1.055 * Math.pow(x, 1 / 2.4) - 0.055;
+  };
+  return `#${toRgb(c).map((v) => Math.round(gamma(v) * 255).toString(16).padStart(2, '0')).join('')}`;
 }
 
 /** Alpha suffix helper: rgba(hex, 0.4) -> '#rrggbb66'. */
@@ -56,28 +85,37 @@ const dark = {
     surface0: hsl(243, 19, 18),  // current-line highlight, inactive selection
     surface1: hsl(243, 17, 24),  // borders, selection
     surface2: hsl(243, 15, 32),  // scrollbar, indent guides, whitespace
-    muted: hsl(246, 22, 58),     // comments — recedes but stays legible
+    faint: hsl(243, 20, 47),     // line numbers, active indent guide — ~3:1, readable if you look
+    muted: hsl(246, 22, 58),     // comments, ghost text — recedes but stays legible
     subtle: hsl(243, 22, 68),    // punctuation, inactive foreground
     text: hsl(240, 30, 87),      // foreground
-    bright: hsl(240, 45, 96),    // emphasis: bold, headings, active tab
+    bright: hsl(240, 45, 92),    // emphasis: bold, headings, active tab
+    tint: hsl(250, 26, 62),      // selection wash — desaturated, owned by no syntax role
   },
+  // One lightness band, okL 74.5–77.5: no token outshines another, and none
+  // outshines body text. Hue carries the meaning; brightness stays flat.
   accents: {
-    teal: hsl(170, 66, 64),      // HERO — functions, methods, UI accent
-    sky: hsl(205, 82, 73),       // properties, tags, links
-    lavender: hsl(256, 74, 78),  // keywords, control flow, storage
-    orchid: hsl(322, 66, 74),    // built-ins, language constructs, units
-    rose: hsl(350, 78, 73),      // errors, invalid, `this`, deletions
-    apricot: hsl(24, 88, 72),    // numbers, constants, escapes
-    amber: hsl(44, 82, 71),      // types, classes, interfaces
-    green: hsl(128, 44, 68),     // strings
+    teal: oklch(77, 0.115, 181),      // HERO — functions, methods, UI accent
+    sky: oklch(75, 0.11, 241),        // properties, tags, links
+    lavender: oklch(77.5, 0.115, 297), // keywords, control flow, storage
+    orchid: oklch(74.5, 0.12, 338),   // built-ins, language constructs, units
+    rose: oklch(77, 0.115, 12),       // `this` / self, HTML tags, markdown lists
+    apricot: oklch(77.5, 0.115, 57),  // numbers, constants, escapes
+    amber: oklch(77, 0.115, 90),      // types, classes, interfaces
+    green: oklch(75, 0.11, 145),      // strings
+  },
+  states: {
+    // Deeper and more chromatic than the band — errors pop through saturation,
+    // not lightness, so a red squiggle reads urgent without glowing.
+    red: oklch(67, 0.16, 25),         // errors, invalid, deletions
   },
 };
 
 // ---------------------------------------------------------------------------
 // Lagoon Soft — same accents, background lifted for bright rooms.
 // ---------------------------------------------------------------------------
-// The ramp is raised ~5 points of lightness. Accents drop ~4 points to hold
-// their contrast against the lighter base.
+// The ramp is raised ~5 points of lightness. The accent band drops ~2 okL to
+// hold a moderate contrast against the lighter base.
 const soft = {
   name: 'Lagoon Soft',
   type: 'dark',
@@ -89,29 +127,34 @@ const soft = {
     surface0: hsl(243, 17, 24),
     surface1: hsl(243, 15, 30),
     surface2: hsl(243, 14, 38),
+    faint: hsl(243, 18, 51),
     muted: hsl(246, 20, 60),
     subtle: hsl(243, 20, 71),
     text: hsl(240, 28, 89),
-    bright: hsl(240, 42, 97),
+    bright: hsl(240, 42, 93),
+    tint: hsl(250, 24, 65),
   },
   accents: {
-    teal: hsl(170, 62, 60),
-    sky: hsl(205, 76, 69),
-    lavender: hsl(256, 68, 75),
-    orchid: hsl(322, 60, 70),
-    rose: hsl(350, 72, 69),
-    apricot: hsl(24, 82, 68),
-    amber: hsl(44, 76, 66),
-    green: hsl(128, 40, 63),
+    teal: oklch(75, 0.115, 181),
+    sky: oklch(73, 0.11, 241),
+    lavender: oklch(75.5, 0.115, 297),
+    orchid: oklch(72.5, 0.12, 338),
+    rose: oklch(75, 0.115, 12),
+    apricot: oklch(75.5, 0.115, 57),
+    amber: oklch(73.5, 0.115, 90),
+    green: oklch(73, 0.11, 145),
+  },
+  states: {
+    red: oklch(65.5, 0.155, 25),
   },
 };
 
 // ---------------------------------------------------------------------------
 // Lagoon Dawn — the light variant.
 // ---------------------------------------------------------------------------
-// Same hues, inverted value ramp. Light backgrounds need the opposite accent
-// treatment: lightness drops well below 50% and saturation climbs, otherwise
-// pastels wash out to illegibility on white.
+// Same hues, inverted value ramp. On white the band flips: accent lightness
+// sits near okL 50 and the uniformity that matters is chroma — one electric
+// hue among muted ones vibrates just as badly as one glowing token on dark.
 const dawn = {
   name: 'Lagoon Dawn',
   type: 'light',
@@ -123,21 +166,26 @@ const dawn = {
     surface0: hsl(240, 30, 93.5),
     surface1: hsl(240, 24, 87),
     surface2: hsl(240, 18, 74),
+    faint: hsl(243, 14, 58),
     muted: hsl(246, 18, 50),
     subtle: hsl(243, 16, 40),
     text: hsl(240, 26, 22),
     bright: hsl(240, 38, 11),
+    tint: hsl(250, 30, 54),
   },
   accents: {
-    teal: hsl(176, 66, 28),
-    sky: hsl(205, 80, 38),
-    lavender: hsl(256, 58, 50),
-    orchid: hsl(322, 58, 42),
-    rose: hsl(348, 70, 45),
-    apricot: hsl(22, 80, 40),
-    amber: hsl(38, 82, 33),
-    green: hsl(132, 50, 32),
+    teal: oklch(52, 0.09, 185),
+    sky: oklch(50.5, 0.12, 245),
+    lavender: oklch(52, 0.13, 291),
+    orchid: oklch(49.5, 0.13, 344),
+    rose: oklch(53, 0.125, 14),
+    apricot: oklch(54.5, 0.12, 46),
+    amber: oklch(51.5, 0.105, 83),
+    green: oklch(50.5, 0.11, 147),
+  },
+  states: {
+    red: oklch(45.5, 0.17, 27),
   },
 };
 
-module.exports = { hsl, alpha, mix, variants: { dark, soft, dawn } };
+module.exports = { hsl, oklch, alpha, mix, variants: { dark, soft, dawn } };
