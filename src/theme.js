@@ -13,16 +13,18 @@ const { alpha, mix } = require('./palette');
  *   sky       properties, tags, attributes
  *   lavender  keywords, control flow, storage, operators-as-words
  *   orchid    built-ins, language constants, CSS units, regex groups
- *   rose      errors, invalid, `this`/self, deletions
+ *   rose      `this`/self, HTML tags, markdown lists   (syntax only — never errors)
  *   apricot   numbers, constants, enum members, escape sequences
  *   amber     types, classes, interfaces, namespaces
  *   green     strings
- *   muted     comments
+ *   red       errors, invalid, deletions   (state — red means broken, nothing else)
+ *   muted     comments, ghost text
  *   subtle    punctuation, delimiters, brackets
+ *   faint     line numbers, active indent guide — quiet but readable
  *   text      plain identifiers and variables
  */
 function buildTheme(variant) {
-  const { neutrals: n, accents: a, type } = variant;
+  const { neutrals: n, accents: a, states: st, type } = variant;
   const isDark = type === 'dark';
 
   // Tint strengths differ by polarity: a 25% wash reads as a clear highlight on
@@ -34,7 +36,7 @@ function buildTheme(variant) {
   // Diff and git states get their own greens/reds: the syntax green is tuned to
   // sit next to a string, not to wash a whole line.
   const added = isDark ? mix(a.green, n.base, 0.15) : a.green;
-  const removed = isDark ? mix(a.rose, n.base, 0.15) : a.rose;
+  const removed = isDark ? mix(st.red, n.base, 0.15) : st.red;
   const shadow = isDark ? alpha('#000000', 0.4) : alpha(n.bright, 0.12);
 
   const colors = {
@@ -42,13 +44,13 @@ function buildTheme(variant) {
     focusBorder: alpha(a.teal, 0.7),
     foreground: n.text,
     descriptionForeground: n.muted,
-    errorForeground: a.rose,
+    errorForeground: st.red,
     'icon.foreground': n.subtle,
     'widget.border': n.surface1,
     'widget.shadow': shadow,
-    'selection.background': alpha(a.teal, t.sel),
+    'selection.background': alpha(n.tint, t.sel),
     'sash.hoverBorder': a.teal,
-    disabledForeground: n.surface2,
+    disabledForeground: n.faint,
 
     'textLink.foreground': a.sky,
     'textLink.activeForeground': a.teal,
@@ -93,8 +95,8 @@ function buildTheme(variant) {
     'inputOption.activeBackground': alpha(a.teal, 0.25),
     'inputOption.activeForeground': a.teal,
     'inputOption.activeBorder': alpha(a.teal, 0.5),
-    'inputValidation.errorBackground': mix(n.base, a.rose, 0.2),
-    'inputValidation.errorBorder': a.rose,
+    'inputValidation.errorBackground': mix(n.base, st.red, 0.2),
+    'inputValidation.errorBorder': st.red,
     'inputValidation.errorForeground': n.text,
     'inputValidation.warningBackground': mix(n.base, a.amber, 0.2),
     'inputValidation.warningBorder': a.amber,
@@ -128,13 +130,13 @@ function buildTheme(variant) {
     'list.focusOutline': alpha(a.teal, 0),
     'list.highlightForeground': a.teal,
     'list.focusHighlightForeground': a.teal,
-    'list.errorForeground': a.rose,
+    'list.errorForeground': st.red,
     'list.warningForeground': a.amber,
     'list.dropBackground': alpha(a.lavender, 0.2),
     'list.deemphasizedForeground': n.muted,
     'listFilterWidget.background': n.elevated,
     'listFilterWidget.outline': a.teal,
-    'listFilterWidget.noMatchesOutline': a.rose,
+    'listFilterWidget.noMatchesOutline': st.red,
     'tree.indentGuidesStroke': n.surface1,
     'tree.inactiveIndentGuidesStroke': alpha(n.surface1, 0.5),
 
@@ -191,7 +193,7 @@ function buildTheme(variant) {
     // -- Editor -------------------------------------------------------------
     'editor.background': n.base,
     'editor.foreground': n.text,
-    'editorLineNumber.foreground': n.surface2,
+    'editorLineNumber.foreground': n.faint,
     'editorLineNumber.activeForeground': a.teal,
     'editorLineNumber.dimmedForeground': alpha(n.surface2, 0.6),
     'editorCursor.foreground': a.teal,
@@ -199,9 +201,10 @@ function buildTheme(variant) {
     'editorMultiCursor.primary.foreground': a.teal,
     'editorMultiCursor.secondary.foreground': a.lavender,
 
-    'editor.selectionBackground': alpha(a.lavender, t.sel),
-    'editor.selectionForeground': n.bright,
-    'editor.inactiveSelectionBackground': alpha(a.lavender, t.selDim),
+    // The selection wash is a desaturated tint no syntax role owns, and there
+    // is no selectionForeground: token colours must survive being selected.
+    'editor.selectionBackground': alpha(n.tint, t.sel),
+    'editor.inactiveSelectionBackground': alpha(n.tint, t.selDim),
     'editor.selectionHighlightBackground': alpha(a.teal, t.hl),
     'editor.selectionHighlightBorder': alpha(a.teal, 0),
     'editor.wordHighlightBackground': alpha(a.sky, t.hl),
@@ -222,8 +225,8 @@ function buildTheme(variant) {
     'editor.symbolHighlightBackground': alpha(a.teal, 0.2),
     'editorLink.activeForeground': a.teal,
     'editorWhitespace.foreground': alpha(n.surface2, 0.5),
-    'editorIndentGuide.background1': alpha(n.surface1, 0.6),
-    'editorIndentGuide.activeBackground1': n.surface2,
+    'editorIndentGuide.background1': n.surface1,
+    'editorIndentGuide.activeBackground1': n.faint,
     'editorInlayHint.background': alpha(n.surface1, 0.5),
     'editorInlayHint.foreground': n.muted,
     'editorInlayHint.typeBackground': alpha(n.surface1, 0.5),
@@ -240,23 +243,25 @@ function buildTheme(variant) {
     'editorUnicodeHighlight.background': alpha(a.amber, 0.12),
 
     // Six-step bracket ladder. Ordered to alternate warm and cool so adjacent
-    // depths never sit next to each other on the wheel.
-    'editorBracketHighlight.foreground1': a.teal,
-    'editorBracketHighlight.foreground2': a.lavender,
-    'editorBracketHighlight.foreground3': a.amber,
-    'editorBracketHighlight.foreground4': a.sky,
-    'editorBracketHighlight.foreground5': a.orchid,
-    'editorBracketHighlight.foreground6': a.green,
-    'editorBracketHighlight.unexpectedBracket.foreground': a.rose,
+    // depths never sit next to each other on the wheel. Each step is pulled
+    // 30% toward text: brackets are structure hints, not tokens, and should
+    // never compete with the code between them.
+    'editorBracketHighlight.foreground1': mix(a.teal, n.text, 0.3),
+    'editorBracketHighlight.foreground2': mix(a.lavender, n.text, 0.3),
+    'editorBracketHighlight.foreground3': mix(a.amber, n.text, 0.3),
+    'editorBracketHighlight.foreground4': mix(a.sky, n.text, 0.3),
+    'editorBracketHighlight.foreground5': mix(a.orchid, n.text, 0.3),
+    'editorBracketHighlight.foreground6': mix(a.green, n.text, 0.3),
+    'editorBracketHighlight.unexpectedBracket.foreground': st.red,
 
-    'editorError.foreground': a.rose,
-    'editorError.background': alpha(a.rose, 0),
+    'editorError.foreground': st.red,
+    'editorError.background': alpha(st.red, 0),
     'editorWarning.foreground': a.amber,
     'editorWarning.background': alpha(a.amber, 0),
     'editorInfo.foreground': a.sky,
     'editorInfo.background': alpha(a.sky, 0),
     'editorHint.foreground': a.teal,
-    'problemsErrorIcon.foreground': a.rose,
+    'problemsErrorIcon.foreground': st.red,
     'problemsWarningIcon.foreground': a.amber,
     'problemsInfoIcon.foreground': a.sky,
 
@@ -277,7 +282,7 @@ function buildTheme(variant) {
     'editorOverviewRuler.modifiedForeground': alpha(a.sky, 0.6),
     'editorOverviewRuler.addedForeground': alpha(added, 0.6),
     'editorOverviewRuler.deletedForeground': alpha(removed, 0.6),
-    'editorOverviewRuler.errorForeground': a.rose,
+    'editorOverviewRuler.errorForeground': st.red,
     'editorOverviewRuler.warningForeground': a.amber,
     'editorOverviewRuler.infoForeground': a.sky,
     'editorOverviewRuler.bracketMatchForeground': alpha(a.teal, 0.5),
@@ -300,11 +305,12 @@ function buildTheme(variant) {
     'editorSuggestWidget.highlightForeground': a.teal,
     'editorSuggestWidget.focusHighlightForeground': a.teal,
     'editorSuggestWidgetStatus.foreground': n.muted,
-    'editorGhostText.foreground': n.surface2,
+    // Ghost text is read, not glanced at: it gets comment-level contrast.
+    'editorGhostText.foreground': n.muted,
     'editorStickyScroll.background': n.mantle,
     'editorStickyScrollHover.background': n.surface0,
     'editorMarkerNavigation.background': n.elevated,
-    'editorMarkerNavigationError.background': a.rose,
+    'editorMarkerNavigationError.background': st.red,
     'editorMarkerNavigationWarning.background': a.amber,
     'editorMarkerNavigationInfo.background': a.sky,
 
@@ -366,7 +372,7 @@ function buildTheme(variant) {
     'terminal.background': n.mantle,
     'terminal.foreground': n.text,
     'terminal.ansiBlack': isDark ? n.surface1 : n.surface2,
-    'terminal.ansiRed': a.rose,
+    'terminal.ansiRed': st.red,
     'terminal.ansiGreen': a.green,
     'terminal.ansiYellow': a.amber,
     'terminal.ansiBlue': a.sky,
@@ -374,15 +380,15 @@ function buildTheme(variant) {
     'terminal.ansiCyan': a.teal,
     'terminal.ansiWhite': n.text,
     'terminal.ansiBrightBlack': n.surface2,
-    'terminal.ansiBrightRed': mix(a.rose, n.bright, 0.2),
+    'terminal.ansiBrightRed': mix(st.red, n.bright, 0.2),
     'terminal.ansiBrightGreen': mix(a.green, n.bright, 0.2),
     'terminal.ansiBrightYellow': mix(a.amber, n.bright, 0.2),
     'terminal.ansiBrightBlue': mix(a.sky, n.bright, 0.2),
     'terminal.ansiBrightMagenta': mix(a.orchid, n.bright, 0.1),
     'terminal.ansiBrightCyan': mix(a.teal, n.bright, 0.2),
     'terminal.ansiBrightWhite': n.bright,
-    'terminal.selectionBackground': alpha(a.lavender, t.sel),
-    'terminal.inactiveSelectionBackground': alpha(a.lavender, t.selDim),
+    'terminal.selectionBackground': alpha(n.tint, t.sel),
+    'terminal.inactiveSelectionBackground': alpha(n.tint, t.selDim),
     'terminal.findMatchBackground': alpha(a.apricot, t.find),
     'terminal.findMatchHighlightBackground': alpha(a.amber, t.findDim),
     'terminal.border': n.surface1,
@@ -391,7 +397,7 @@ function buildTheme(variant) {
     'terminalCursor.background': n.mantle,
     'terminalCommandDecoration.defaultBackground': n.surface2,
     'terminalCommandDecoration.successBackground': a.green,
-    'terminalCommandDecoration.errorBackground': a.rose,
+    'terminalCommandDecoration.errorBackground': st.red,
 
     // -- Status bar ---------------------------------------------------------
     'statusBar.background': n.crust,
@@ -409,8 +415,8 @@ function buildTheme(variant) {
     'statusBarItem.prominentHoverBackground': n.surface2,
     'statusBarItem.remoteBackground': a.teal,
     'statusBarItem.remoteForeground': isDark ? n.crust : n.base,
-    'statusBarItem.errorBackground': alpha(a.rose, 0),
-    'statusBarItem.errorForeground': a.rose,
+    'statusBarItem.errorBackground': alpha(st.red, 0),
+    'statusBarItem.errorForeground': st.red,
     'statusBarItem.warningBackground': alpha(a.amber, 0),
     'statusBarItem.warningForeground': a.amber,
     'statusBarItem.focusBorder': a.teal,
@@ -449,7 +455,7 @@ function buildTheme(variant) {
     'notifications.border': n.surface1,
     'notificationToast.border': n.surface1,
     'notificationLink.foreground': a.sky,
-    'notificationsErrorIcon.foreground': a.rose,
+    'notificationsErrorIcon.foreground': st.red,
     'notificationsWarningIcon.foreground': a.amber,
     'notificationsInfoIcon.foreground': a.sky,
     'banner.background': n.surface0,
@@ -459,12 +465,12 @@ function buildTheme(variant) {
     // -- Git / SCM ----------------------------------------------------------
     'gitDecoration.addedResourceForeground': a.green,
     'gitDecoration.modifiedResourceForeground': a.amber,
-    'gitDecoration.deletedResourceForeground': a.rose,
+    'gitDecoration.deletedResourceForeground': st.red,
     'gitDecoration.renamedResourceForeground': a.teal,
     'gitDecoration.stageModifiedResourceForeground': a.teal,
-    'gitDecoration.stageDeletedResourceForeground': a.rose,
+    'gitDecoration.stageDeletedResourceForeground': st.red,
     'gitDecoration.untrackedResourceForeground': a.sky,
-    'gitDecoration.ignoredResourceForeground': n.surface2,
+    'gitDecoration.ignoredResourceForeground': n.faint,
     'gitDecoration.conflictingResourceForeground': a.orchid,
     'gitDecoration.submoduleResourceForeground': a.lavender,
     'scmGraph.historyItemHoverLabelForeground': n.crust,
@@ -477,15 +483,15 @@ function buildTheme(variant) {
     // -- Debug --------------------------------------------------------------
     'debugToolBar.background': n.elevated,
     'debugToolBar.border': n.surface1,
-    'debugIcon.breakpointForeground': a.rose,
-    'debugIcon.breakpointDisabledForeground': alpha(a.rose, 0.5),
+    'debugIcon.breakpointForeground': st.red,
+    'debugIcon.breakpointDisabledForeground': alpha(st.red, 0.5),
     'debugIcon.breakpointUnverifiedForeground': n.surface2,
     'debugIcon.breakpointCurrentStackframeForeground': a.amber,
     'debugIcon.breakpointStackframeForeground': a.teal,
     'debugIcon.startForeground': a.green,
     'debugIcon.pauseForeground': a.sky,
-    'debugIcon.stopForeground': a.rose,
-    'debugIcon.disconnectForeground': a.rose,
+    'debugIcon.stopForeground': st.red,
+    'debugIcon.disconnectForeground': st.red,
     'debugIcon.restartForeground': a.teal,
     'debugIcon.stepOverForeground': a.lavender,
     'debugIcon.stepIntoForeground': a.lavender,
@@ -494,7 +500,7 @@ function buildTheme(variant) {
     'debugIcon.stepBackForeground': a.lavender,
     'debugConsole.infoForeground': a.sky,
     'debugConsole.warningForeground': a.amber,
-    'debugConsole.errorForeground': a.rose,
+    'debugConsole.errorForeground': st.red,
     'debugConsole.sourceForeground': n.muted,
     'debugConsoleInputIcon.foreground': a.teal,
     'debugTokenExpression.name': a.sky,
@@ -502,25 +508,25 @@ function buildTheme(variant) {
     'debugTokenExpression.string': a.green,
     'debugTokenExpression.boolean': a.orchid,
     'debugTokenExpression.number': a.apricot,
-    'debugTokenExpression.error': a.rose,
+    'debugTokenExpression.error': st.red,
     'editor.stackFrameHighlightBackground': alpha(a.amber, 0.2),
     'editor.focusedStackFrameHighlightBackground': alpha(a.green, 0.2),
 
     // -- Testing ------------------------------------------------------------
     'testing.iconPassed': a.green,
-    'testing.iconFailed': a.rose,
-    'testing.iconErrored': a.rose,
+    'testing.iconFailed': st.red,
+    'testing.iconErrored': st.red,
     'testing.iconQueued': a.amber,
     'testing.iconSkipped': n.surface2,
     'testing.iconUnset': n.surface2,
     'testing.runAction': a.green,
-    'testing.message.error.decorationForeground': a.rose,
+    'testing.message.error.decorationForeground': st.red,
     'testing.message.info.decorationForeground': n.muted,
 
     // -- Charts / misc ------------------------------------------------------
     'charts.foreground': n.text,
     'charts.lines': n.surface2,
-    'charts.red': a.rose,
+    'charts.red': st.red,
     'charts.blue': a.sky,
     'charts.yellow': a.amber,
     'charts.orange': a.apricot,
@@ -597,7 +603,7 @@ function buildTheme(variant) {
     'notebook.selectedCellBorder': n.surface1,
     'notebook.outputContainerBackgroundColor': alpha(n.mantle, 0.5),
     'notebookStatusSuccessIcon.foreground': a.green,
-    'notebookStatusErrorIcon.foreground': a.rose,
+    'notebookStatusErrorIcon.foreground': st.red,
     'notebookStatusRunningIcon.foreground': a.sky,
 
     'searchEditor.findMatchBackground': alpha(a.apricot, t.findDim),
@@ -648,7 +654,7 @@ function buildTheme(variant) {
     struct: a.amber,
     type: a.amber,
     'type.defaultLibrary': a.amber,
-    typeParameter: { foreground: a.amber, italic: true },
+    typeParameter: a.amber,
     parameter: { foreground: n.subtle, italic: true },
     variable: n.text,
     'variable.readonly': n.text,
@@ -673,7 +679,7 @@ function buildTheme(variant) {
     number: a.apricot,
     regexp: a.orchid,
     operator: n.subtle,
-    selfKeyword: { foreground: a.rose, italic: true },
+    selfKeyword: a.rose,
     builtinConstant: a.orchid,
     magicFunction: a.teal,
     module: a.amber,
@@ -731,7 +737,7 @@ function buildTheme(variant) {
         'variable.language.special.self',
         'keyword.other.this',
       ],
-      settings: { foreground: a.rose, fontStyle: 'italic' },
+      settings: { foreground: a.rose },
     },
     {
       name: 'Constants and enum members',
@@ -836,7 +842,7 @@ function buildTheme(variant) {
         'keyword.control.conditional',
         'keyword.control.loop',
       ],
-      settings: { foreground: a.lavender, fontStyle: 'italic' },
+      settings: { foreground: a.lavender },
     },
     {
       name: 'Import and export',
@@ -847,7 +853,7 @@ function buildTheme(variant) {
         'keyword.control.default',
         'keyword.control.as',
       ],
-      settings: { foreground: a.orchid, fontStyle: 'italic' },
+      settings: { foreground: a.orchid },
     },
     {
       name: 'Operators',
@@ -943,12 +949,12 @@ function buildTheme(variant) {
         'keyword.type',
         'entity.name.type.primitive',
       ],
-      settings: { foreground: a.amber, fontStyle: 'italic' },
+      settings: { foreground: a.amber },
     },
     {
       name: 'Type parameters and generics',
       scope: ['meta.type.parameters entity.name.type', 'entity.name.type.parameter'],
-      settings: { foreground: mix(a.amber, n.text, 0.25), fontStyle: 'italic' },
+      settings: { foreground: mix(a.amber, n.text, 0.25) },
     },
     {
       name: 'Object properties and keys',
@@ -996,7 +1002,7 @@ function buildTheme(variant) {
         'entity.other.attribute-name.html',
         'meta.tag entity.other.attribute-name',
       ],
-      settings: { foreground: a.sky, fontStyle: 'italic' },
+      settings: { foreground: a.sky },
     },
     {
       name: 'Tag punctuation',
@@ -1030,7 +1036,7 @@ function buildTheme(variant) {
         'entity.other.attribute-name.pseudo-element',
         'meta.selector',
       ],
-      settings: { foreground: a.orchid, fontStyle: 'italic' },
+      settings: { foreground: a.orchid },
     },
     {
       name: 'CSS properties',
@@ -1088,7 +1094,7 @@ function buildTheme(variant) {
 
     // -- Diff ---------------------------------------------------------------
     { name: 'Diff inserted', scope: ['markup.inserted', 'meta.diff.header.to-file'], settings: { foreground: a.green } },
-    { name: 'Diff deleted', scope: ['markup.deleted', 'meta.diff.header.from-file'], settings: { foreground: a.rose } },
+    { name: 'Diff deleted', scope: ['markup.deleted', 'meta.diff.header.from-file'], settings: { foreground: st.red } },
     { name: 'Diff changed', scope: ['markup.changed'], settings: { foreground: a.amber } },
     { name: 'Diff range', scope: ['meta.diff.range', 'punctuation.definition.range.diff'], settings: { foreground: a.orchid } },
 
@@ -1110,17 +1116,17 @@ function buildTheme(variant) {
 
     // -- Language specifics -------------------------------------------------
     { name: 'Python decorators and dunder', scope: ['support.function.magic.python', 'meta.function.decorator.python'], settings: { foreground: a.teal, fontStyle: 'italic' } },
-    { name: 'Python self', scope: ['variable.parameter.function.language.special.self.python'], settings: { foreground: a.rose, fontStyle: 'italic' } },
-    { name: 'Rust lifetimes and attributes', scope: ['storage.modifier.lifetime.rust', 'entity.name.lifetime.rust', 'meta.attribute.rust'], settings: { foreground: a.orchid, fontStyle: 'italic' } },
+    { name: 'Python self', scope: ['variable.parameter.function.language.special.self.python'], settings: { foreground: a.rose } },
+    { name: 'Rust lifetimes and attributes', scope: ['storage.modifier.lifetime.rust', 'entity.name.lifetime.rust', 'meta.attribute.rust'], settings: { foreground: a.orchid } },
     { name: 'Go package and receiver', scope: ['entity.name.package.go', 'variable.other.receiver.go'], settings: { foreground: a.amber } },
     { name: 'C and C++ preprocessor', scope: ['keyword.control.directive', 'meta.preprocessor', 'punctuation.definition.directive'], settings: { foreground: a.orchid } },
     { name: 'SQL keywords', scope: ['keyword.other.DML', 'keyword.other.DDL'], settings: { foreground: a.lavender } },
     { name: 'GraphQL fields', scope: ['variable.graphql', 'meta.selection-set.graphql variable'], settings: { foreground: a.sky } },
 
     // -- States -------------------------------------------------------------
-    { name: 'Invalid', scope: ['invalid', 'invalid.illegal'], settings: { foreground: a.rose, fontStyle: 'italic' } },
-    { name: 'Deprecated', scope: ['invalid.deprecated'], settings: { foreground: a.amber, fontStyle: 'italic strikethrough' } },
-    { name: 'Broken and unimplemented', scope: ['invalid.broken', 'invalid.unimplemented'], settings: { foreground: a.rose } },
+    { name: 'Invalid', scope: ['invalid', 'invalid.illegal'], settings: { foreground: st.red } },
+    { name: 'Deprecated', scope: ['invalid.deprecated'], settings: { foreground: a.amber, fontStyle: 'strikethrough' } },
+    { name: 'Broken and unimplemented', scope: ['invalid.broken', 'invalid.unimplemented'], settings: { foreground: st.red } },
   ];
 
   return {

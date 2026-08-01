@@ -1,6 +1,32 @@
 # Changelog
 
-## 1.0.1 — 2026-07-26
+## 1.1.0 — 2026-08-01
+
+A comfort pass on every variant, aimed at long sessions. 1.0 audited only a contrast *floor*;
+these changes control the ceiling and the evenness, which is what the eye actually feels
+over hours.
+
+- **Accents are now authored in OKLCH and share one perceptual lightness band per variant**
+  (dark: okL 74.5–77.5, was 73.6–87.0). At the same HSL lightness, yellow glows and violet
+  recedes — so amber types and teal functions used to outshine everything else on the page.
+  Now no token is brighter than another, and none is brighter than body text. The band, the
+  ceiling, and a 1.35× max spread are enforced by the build audit.
+- **Red means broken, nothing else.** A dedicated diagnostics red (`#e76761` dark, `#a01819`
+  light) now carries errors, invalid code, and deletions. Rose stays a syntax colour — `this`,
+  HTML/JSX tags, markdown lists — so web code no longer looks like a page of errors, and an
+  error squiggle is unmistakable. The audit keeps red ΔE ≥ 22 from every syntax accent.
+- **Ghost text is readable.** Inline suggestions sat at 1.96:1 — below the point of legibility.
+  They now use the comment colour (4.6:1). A new `faint` neutral step (≥ 3:1) fills the hole in
+  the ramp for line numbers, the active indent guide, disabled text, and ignored files.
+- **Selections no longer erase syntax.** `editor.selectionForeground` is gone — token colours
+  survive being selected — and the selection wash is a desaturated tint owned by no syntax role,
+  instead of the keyword lavender.
+- **Fewer italics.** Comments, parameters, and decorators keep them. Control flow, imports,
+  `this`, tag attributes, primitives, and lifetimes sit upright — five slanted line-starts in a
+  row was texture, not information.
+- Bracket-pair colours pulled 30% toward the text colour: structure hints, not tokens.
+- `bright` softened from 15.9:1 to 14:1; Dawn's accent chroma equalised (lavender was
+  electric-violet at 0.212 while teal sat muted at 0.084 — both now near 0.12).
 
 Documentation only. The three theme files are byte-identical to 1.0.0, so nothing changes in the
 editor — this exists to correct the install instructions and to publish the usage docs, which can

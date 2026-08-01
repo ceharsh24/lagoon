@@ -28,14 +28,23 @@ const CHECK_ONLY = process.argv.includes('--check');
 // only need AA: they carry meaning through hue as well as luminance. Comments
 // are deliberately allowed to sit lower — they are meant to recede — but not
 // below 3:1, where they stop being readable at small sizes.
+//
+// The floor is not the whole story. Accents also have a ceiling — none may be
+// brighter than body text — and a band: the brightest accent may exceed the
+// dimmest by at most 1.35x. Brightness is salience, and an accent that
+// outshines the band pulls the eye on every line for no semantic reason.
+// State colours (red) sit outside the band on purpose; they only need the
+// floor, plus ΔE distance from every syntax accent.
 const MIN_TEXT = 7.0;
 const MIN_ACCENT = 4.5;
 const MIN_COMMENT = 3.0;
 const WANT_COMMENT = 4.5;
+const MIN_FAINT = 3.0;
 const MIN_DELTA_E = 22;
+const MAX_ACCENT_SPREAD = 1.35;
 
 function audit(variant) {
-  const { neutrals: n, accents: a } = variant;
+  const { neutrals: n, accents: a, states: st } = variant;
   const bg = n.base;
   const rows = [];
   const failures = [];
@@ -52,11 +61,28 @@ function audit(variant) {
   check('bright', n.bright, MIN_TEXT);
   check('subtle (punctuation)', n.subtle, MIN_ACCENT);
   check('muted (comments)', n.muted, MIN_COMMENT, WANT_COMMENT);
+  check('faint (line numbers)', n.faint, MIN_FAINT);
   for (const [name, hex] of Object.entries(a)) check(name, hex, MIN_ACCENT);
+  for (const [name, hex] of Object.entries(st)) check(`${name} (state)`, hex, MIN_ACCENT);
+
+  // Ceiling and band: syntax accents live in one brightness band below text.
+  const textRatio = contrast(n.text, bg);
+  const ratios = Object.entries(a).map(([name, hex]) => [name, contrast(hex, bg)]);
+  for (const [name, ratio] of ratios) {
+    if (ratio > textRatio) failures.push(`${variant.name}: ${name} at ${ratio.toFixed(2)}:1 outshines body text (${textRatio.toFixed(2)}:1)`);
+  }
+  const sorted = [...ratios].sort((x, y) => x[1] - y[1]);
+  const [dimmest, brightest] = [sorted[0], sorted[sorted.length - 1]];
+  const spread = brightest[1] / dimmest[1];
+  if (spread > MAX_ACCENT_SPREAD) {
+    failures.push(`${variant.name}: accent band too wide — ${brightest[0]} ${brightest[1].toFixed(2)}:1 vs ${dimmest[0]} ${dimmest[1].toFixed(2)}:1 (${spread.toFixed(2)}x, max ${MAX_ACCENT_SPREAD}x)`);
+  }
 
   // Accents must also be distinguishable from each other, not just from the
   // background — otherwise strings and functions read as the same token.
-  const entries = Object.entries(a);
+  // States join this check: error red collapsing into rose would undo the
+  // reason red exists at all.
+  const entries = Object.entries({ ...a, ...st });
   let closest = { pair: '—', d: Infinity };
   for (let i = 0; i < entries.length; i++) {
     for (let j = i + 1; j < entries.length; j++) {
