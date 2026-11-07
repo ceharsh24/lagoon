@@ -92,17 +92,22 @@ const dark = {
     bright: hsl(240, 45, 92),    // emphasis: bold, headings, active tab
     tint: hsl(250, 26, 62),      // selection wash — desaturated, owned by no syntax role
   },
-  // One lightness band, okL 74.5–77.5: no token outshines another, and none
-  // outshines body text. Hue carries the meaning; brightness stays flat.
+  // One lightness band, okL 72–80.5: no token outshines body text, and the
+  // brightest sits within 1.3x of the dimmest. The band is not perfectly flat
+  // on purpose. With every accent at one lightness, hue is the only cue left,
+  // and red–green colour blindness takes half of hue away — sky and lavender
+  // (properties, keywords) and apricot and amber (numbers, types) collapsed
+  // into one colour each. Small lightness offsets inside the band pull those
+  // pairs apart for everyone, and the audit holds them apart.
   accents: {
     teal: oklch(77, 0.115, 181),      // HERO — functions, methods, UI accent
-    sky: oklch(75, 0.11, 241),        // properties, tags, links
-    lavender: oklch(77.5, 0.115, 297), // keywords, control flow, storage
+    sky: oklch(72, 0.11, 241),        // properties, tags, links
+    lavender: oklch(80.5, 0.115, 297), // keywords, control flow, storage
     orchid: oklch(74.5, 0.12, 338),   // built-ins, language constructs, units
     rose: oklch(77, 0.115, 12),       // `this` / self, HTML tags, markdown lists
-    apricot: oklch(77.5, 0.115, 57),  // numbers, constants, escapes
-    amber: oklch(77, 0.115, 90),      // types, classes, interfaces
-    green: oklch(75, 0.11, 145),      // strings
+    apricot: oklch(78, 0.115, 57),    // numbers, constants, escapes
+    amber: oklch(73, 0.115, 90),      // types, classes, interfaces
+    green: oklch(76.5, 0.11, 145),    // strings
   },
   states: {
     // Deeper and more chromatic than the band — errors pop through saturation,
@@ -115,7 +120,8 @@ const dark = {
 // Lagoon Soft — same accents, background lifted for bright rooms.
 // ---------------------------------------------------------------------------
 // The ramp is raised ~5 points of lightness. The accent band drops ~2 okL to
-// hold a moderate contrast against the lighter base.
+// hold a moderate contrast against the lighter base, with the same
+// colour-blindness offsets as Lagoon.
 const soft = {
   name: 'Lagoon Soft',
   type: 'dark',
@@ -136,16 +142,16 @@ const soft = {
   },
   accents: {
     teal: oklch(75, 0.115, 181),
-    sky: oklch(73, 0.11, 241),
-    lavender: oklch(75.5, 0.115, 297),
+    sky: oklch(70, 0.11, 241),
+    lavender: oklch(77.5, 0.115, 297),
     orchid: oklch(72.5, 0.12, 338),
     rose: oklch(75, 0.115, 12),
     apricot: oklch(75.5, 0.115, 57),
-    amber: oklch(73.5, 0.115, 90),
-    green: oklch(73, 0.11, 145),
+    amber: oklch(71, 0.115, 90),
+    green: oklch(74, 0.11, 145),
   },
   states: {
-    red: oklch(65.5, 0.155, 25),
+    red: oklch(68, 0.16, 27),         // lifted so error text holds 4.5:1 on Soft's lighter widgets
   },
 };
 
@@ -174,13 +180,13 @@ const dawn = {
     tint: hsl(250, 30, 54),
   },
   accents: {
-    teal: oklch(52, 0.09, 185),
-    sky: oklch(50.5, 0.12, 245),
-    lavender: oklch(52, 0.13, 291),
+    teal: oklch(51.5, 0.09, 185),
+    sky: oklch(47.5, 0.12, 245),
+    lavender: oklch(53.5, 0.13, 291),
     orchid: oklch(49.5, 0.13, 344),
     rose: oklch(53, 0.125, 14),
-    apricot: oklch(54.5, 0.12, 46),
-    amber: oklch(51.5, 0.105, 83),
+    apricot: oklch(53.5, 0.12, 46),
+    amber: oklch(51, 0.105, 83),
     green: oklch(50.5, 0.11, 147),
   },
   states: {
