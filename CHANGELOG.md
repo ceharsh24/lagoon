@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0 — 2026-11-07
 
 An accessibility pass. 1.1 audited the palette against the editor background; the theme is
 now audited as VS Code draws it — about 220 foreground/background pairs per variant, each on the
