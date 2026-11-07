@@ -29,8 +29,11 @@ function buildTheme(variant) {
 
   // Tint strengths differ by polarity: a 25% wash reads as a clear highlight on
   // a dark base but as mud on a light one, where less alpha carries further.
+  // Every wash is capped by the dimmest token drawn on it — comment grey has
+  // to keep 3:1 on a selection or find match. The current find match also
+  // carries a border, so its fill can stay light.
   const t = isDark
-    ? { sel: 0.3, selDim: 0.18, hl: 0.16, find: 0.4, findDim: 0.22, diff: 0.16, gutter: 0.9 }
+    ? { sel: 0.24, selDim: 0.14, hl: 0.16, find: 0.2, findDim: 0.14, diff: 0.16, gutter: 0.9 }
     : { sel: 0.22, selDim: 0.12, hl: 0.14, find: 0.32, findDim: 0.18, diff: 0.14, gutter: 0.85 };
 
   // Diff and git states get their own greens/reds: the syntax green is tuned to
@@ -39,11 +42,30 @@ function buildTheme(variant) {
   const removed = isDark ? mix(st.red, n.base, 0.15) : st.red;
   const shadow = isDark ? alpha('#000000', 0.4) : alpha(n.bright, 0.12);
 
+  // Labels on a filled accent — buttons, badges, the remote indicator — take
+  // the far end of the ramp so a saturated fill never fights its label.
+  const onAccent = isDark ? n.crust : n.base;
+
+  // Secondary UI text: descriptions, inlay hints, widget status lines. Comment
+  // grey clears 4.5:1 on the editor but not on raised widgets, so this sits
+  // between comments and punctuation.
+  const secondary = mix(n.muted, n.subtle, 0.6);
+
+  // Quiet text on the frame (inactive tabs, inactive title bar). The frame is
+  // darker than the editor in every variant — which adds contrast to light
+  // text on the dark variants and takes it away from dark text on Dawn.
+  const quietOnFrame = isDark ? n.muted : n.subtle;
+
+  // Teal text on a surface darker than Dawn's ground — a selected row, a
+  // teal-tinted chip. Dawn's teal is tuned for the near-white editor, so it is
+  // deepened there to stay legible; on the dark variants it is unchanged.
+  const tealOnTint = isDark ? a.teal : mix(a.teal, n.bright, 0.3);
+
   const colors = {
     // -- Base ---------------------------------------------------------------
     focusBorder: alpha(a.teal, 0.7),
     foreground: n.text,
-    descriptionForeground: n.muted,
+    descriptionForeground: secondary,
     errorForeground: st.red,
     'icon.foreground': n.subtle,
     'widget.border': n.surface1,
@@ -65,15 +87,15 @@ function buildTheme(variant) {
     'titleBar.activeBackground': n.crust,
     'titleBar.activeForeground': n.text,
     'titleBar.inactiveBackground': n.crust,
-    'titleBar.inactiveForeground': n.muted,
+    'titleBar.inactiveForeground': quietOnFrame,
     'titleBar.border': isDark ? n.crust : n.surface1,
 
     // -- Buttons ------------------------------------------------------------
     // The hero accent carries the primary action. Foreground is the darkest
     // neutral on dark variants so a saturated fill never fights the label.
     'button.background': a.teal,
-    'button.foreground': isDark ? n.crust : n.base,
-    'button.hoverBackground': mix(a.teal, isDark ? n.bright : n.bright, 0.15),
+    'button.foreground': onAccent,
+    'button.hoverBackground': mix(a.teal, n.bright, 0.15),
     'button.secondaryBackground': n.surface1,
     'button.secondaryForeground': n.text,
     'button.secondaryHoverBackground': n.surface2,
@@ -88,7 +110,9 @@ function buildTheme(variant) {
     'dropdown.foreground': n.text,
     'dropdown.border': n.surface1,
 
-    'input.background': isDark ? n.crust : n.surface0,
+    // Dawn's inputs are the editor's near-white, set into the darker side bar
+    // by their border — a grey field pulled placeholder text below 4.5:1.
+    'input.background': isDark ? n.crust : n.base,
     'input.foreground': n.text,
     'input.border': n.surface1,
     'input.placeholderForeground': n.muted,
@@ -111,11 +135,32 @@ function buildTheme(variant) {
     'scrollbarSlider.hoverBackground': alpha(n.surface2, 0.6),
     'scrollbarSlider.activeBackground': alpha(a.teal, 0.5),
 
+    // -- Minimap ------------------------------------------------------------
+    // Several minimap colours are fixed in VS Code rather than derived from
+    // the editor's, so without these the minimap shows stock blue selections
+    // and orange find matches on an indigo ground.
+    'minimap.selectionHighlight': alpha(n.tint, 0.55),
+    'minimap.selectionOccurrenceHighlight': alpha(a.teal, 0.4),
+    'minimap.findMatchHighlight': alpha(a.apricot, 0.7),
+    'minimap.errorHighlight': alpha(st.red, 0.8),
+    'minimap.warningHighlight': alpha(a.amber, 0.8),
+    'minimap.infoHighlight': alpha(a.sky, 0.8),
+    'minimapGutter.addedBackground': alpha(added, t.gutter),
+    'minimapGutter.modifiedBackground': alpha(a.sky, t.gutter),
+    'minimapGutter.deletedBackground': alpha(removed, t.gutter),
+    'minimapSlider.background': alpha(n.surface2, 0.25),
+    'minimapSlider.hoverBackground': alpha(n.surface2, 0.4),
+    'minimapSlider.activeBackground': alpha(a.teal, 0.3),
+
+    // -- Toolbars -----------------------------------------------------------
+    'toolbar.hoverBackground': alpha(n.surface1, 0.6),
+    'toolbar.activeBackground': alpha(n.surface2, 0.5),
+
     // -- Badges / progress --------------------------------------------------
     'badge.background': a.teal,
-    'badge.foreground': isDark ? n.crust : n.base,
+    'badge.foreground': onAccent,
     'activityBarBadge.background': a.teal,
-    'activityBarBadge.foreground': isDark ? n.crust : n.base,
+    'activityBarBadge.foreground': onAccent,
     'progressBar.background': a.teal,
 
     // -- Lists / trees ------------------------------------------------------
@@ -125,11 +170,16 @@ function buildTheme(variant) {
     'list.inactiveSelectionForeground': n.text,
     'list.hoverBackground': alpha(n.surface1, 0.5),
     'list.hoverForeground': n.text,
-    'list.focusBackground': isDark ? n.surface0 : n.surface1,
+    // Keyboard focus and selection are different things — in a multi-select
+    // list you move focus without selecting. Focus gets an outline and no
+    // fill, so a focused row never looks selected; on a row that is both, the
+    // selection fill already says enough and the outline steps aside.
+    'list.focusBackground': alpha(n.surface0, 0),
     'list.focusForeground': n.bright,
-    'list.focusOutline': alpha(a.teal, 0),
-    'list.highlightForeground': a.teal,
-    'list.focusHighlightForeground': a.teal,
+    'list.focusOutline': alpha(a.teal, 0.6),
+    'list.focusAndSelectionOutline': alpha(a.teal, 0),
+    'list.highlightForeground': tealOnTint,
+    'list.focusHighlightForeground': tealOnTint,
     'list.errorForeground': st.red,
     'list.warningForeground': a.amber,
     'list.dropBackground': alpha(a.lavender, 0.2),
@@ -177,11 +227,11 @@ function buildTheme(variant) {
     'tab.activeBorderTop': a.teal,
     'tab.activeBorder': alpha(n.base, 0),
     'tab.inactiveBackground': n.crust,
-    'tab.inactiveForeground': n.muted,
+    'tab.inactiveForeground': quietOnFrame,
     'tab.unfocusedActiveBackground': n.base,
     'tab.unfocusedActiveForeground': n.subtle,
     'tab.unfocusedActiveBorderTop': alpha(a.teal, 0.4),
-    'tab.unfocusedInactiveForeground': n.muted,
+    'tab.unfocusedInactiveForeground': quietOnFrame,
     'tab.border': isDark ? n.crust : n.surface1,
     'tab.hoverBackground': n.elevated,
     'tab.hoverForeground': n.text,
@@ -208,7 +258,7 @@ function buildTheme(variant) {
     'editor.selectionHighlightBackground': alpha(a.teal, t.hl),
     'editor.selectionHighlightBorder': alpha(a.teal, 0),
     'editor.wordHighlightBackground': alpha(a.sky, t.hl),
-    'editor.wordHighlightStrongBackground': alpha(a.teal, t.hl + 0.06),
+    'editor.wordHighlightStrongBackground': alpha(a.teal, t.hl + 0.03),
     'editor.wordHighlightTextBackground': alpha(a.sky, t.hl),
 
     'editor.findMatchBackground': alpha(a.apricot, t.find),
@@ -219,7 +269,7 @@ function buildTheme(variant) {
     'editor.currentSearchMatchHighlightBackground': alpha(a.apricot, t.find),
 
     'editor.hoverHighlightBackground': alpha(a.sky, 0.12),
-    'editor.lineHighlightBackground': isDark ? n.surface0 : alpha(n.surface0, 0.7),
+    'editor.lineHighlightBackground': isDark ? n.surface0 : mix(n.base, n.surface0, 0.85),
     'editor.lineHighlightBorder': alpha(n.surface0, 0),
     'editor.rangeHighlightBackground': alpha(n.surface1, 0.4),
     'editor.symbolHighlightBackground': alpha(a.teal, 0.2),
@@ -228,11 +278,11 @@ function buildTheme(variant) {
     'editorIndentGuide.background1': n.surface1,
     'editorIndentGuide.activeBackground1': n.faint,
     'editorInlayHint.background': alpha(n.surface1, 0.5),
-    'editorInlayHint.foreground': n.muted,
+    'editorInlayHint.foreground': secondary,
     'editorInlayHint.typeBackground': alpha(n.surface1, 0.5),
-    'editorInlayHint.typeForeground': n.muted,
+    'editorInlayHint.typeForeground': secondary,
     'editorInlayHint.parameterBackground': alpha(n.surface1, 0.5),
-    'editorInlayHint.parameterForeground': n.muted,
+    'editorInlayHint.parameterForeground': secondary,
     'editorRuler.foreground': alpha(n.surface1, 0.8),
     'editorCodeLens.foreground': n.muted,
     'editorLightBulb.foreground': a.amber,
@@ -303,8 +353,8 @@ function buildTheme(variant) {
     'editorSuggestWidget.selectedForeground': n.bright,
     'editorSuggestWidget.selectedIconForeground': a.teal,
     'editorSuggestWidget.highlightForeground': a.teal,
-    'editorSuggestWidget.focusHighlightForeground': a.teal,
-    'editorSuggestWidgetStatus.foreground': n.muted,
+    'editorSuggestWidget.focusHighlightForeground': tealOnTint,
+    'editorSuggestWidgetStatus.foreground': secondary,
     // Ghost text is read, not glanced at: it gets comment-level contrast.
     'editorGhostText.foreground': n.muted,
     'editorStickyScroll.background': n.mantle,
@@ -327,7 +377,7 @@ function buildTheme(variant) {
     'peekViewResult.selectionForeground': n.bright,
     'peekViewTitle.background': n.elevated,
     'peekViewTitleLabel.foreground': n.bright,
-    'peekViewTitleDescription.foreground': n.muted,
+    'peekViewTitleDescription.foreground': secondary,
 
     // -- Diff ---------------------------------------------------------------
     'diffEditor.insertedTextBackground': alpha(added, t.diff),
@@ -371,22 +421,26 @@ function buildTheme(variant) {
 
     'terminal.background': n.mantle,
     'terminal.foreground': n.text,
-    'terminal.ansiBlack': isDark ? n.surface1 : n.surface2,
+    // Black and white keep their meaning in every variant — black is the dark
+    // end, white the light end — because programs pair them with explicit
+    // backgrounds. Bright black is the one read as text on the terminal ground
+    // (shell autosuggestions, dimmed tool output), so it gets comment contrast.
+    'terminal.ansiBlack': isDark ? n.crust : n.text,
     'terminal.ansiRed': st.red,
     'terminal.ansiGreen': a.green,
     'terminal.ansiYellow': a.amber,
     'terminal.ansiBlue': a.sky,
     'terminal.ansiMagenta': a.lavender,
     'terminal.ansiCyan': a.teal,
-    'terminal.ansiWhite': n.text,
-    'terminal.ansiBrightBlack': n.surface2,
+    'terminal.ansiWhite': isDark ? n.text : n.faint,
+    'terminal.ansiBrightBlack': n.muted,
     'terminal.ansiBrightRed': mix(st.red, n.bright, 0.2),
     'terminal.ansiBrightGreen': mix(a.green, n.bright, 0.2),
     'terminal.ansiBrightYellow': mix(a.amber, n.bright, 0.2),
     'terminal.ansiBrightBlue': mix(a.sky, n.bright, 0.2),
     'terminal.ansiBrightMagenta': mix(a.orchid, n.bright, 0.1),
     'terminal.ansiBrightCyan': mix(a.teal, n.bright, 0.2),
-    'terminal.ansiBrightWhite': n.bright,
+    'terminal.ansiBrightWhite': isDark ? n.bright : n.surface2,
     'terminal.selectionBackground': alpha(n.tint, t.sel),
     'terminal.inactiveSelectionBackground': alpha(n.tint, t.selDim),
     'terminal.findMatchBackground': alpha(a.apricot, t.find),
@@ -404,9 +458,9 @@ function buildTheme(variant) {
     'statusBar.foreground': n.subtle,
     'statusBar.border': isDark ? n.crust : n.surface1,
     'statusBar.noFolderBackground': n.crust,
-    'statusBar.noFolderForeground': n.muted,
+    'statusBar.noFolderForeground': quietOnFrame,
     'statusBar.debuggingBackground': a.apricot,
-    'statusBar.debuggingForeground': isDark ? n.crust : n.base,
+    'statusBar.debuggingForeground': onAccent,
     'statusBar.debuggingBorder': alpha(a.apricot, 0),
     'statusBarItem.hoverBackground': alpha(n.surface1, 0.6),
     'statusBarItem.activeBackground': alpha(n.surface2, 0.5),
@@ -414,7 +468,7 @@ function buildTheme(variant) {
     'statusBarItem.prominentForeground': n.bright,
     'statusBarItem.prominentHoverBackground': n.surface2,
     'statusBarItem.remoteBackground': a.teal,
-    'statusBarItem.remoteForeground': isDark ? n.crust : n.base,
+    'statusBarItem.remoteForeground': onAccent,
     'statusBarItem.errorBackground': alpha(st.red, 0),
     'statusBarItem.errorForeground': st.red,
     'statusBarItem.warningBackground': alpha(a.amber, 0),
@@ -461,6 +515,29 @@ function buildTheme(variant) {
     'banner.background': n.surface0,
     'banner.foreground': n.text,
     'banner.iconForeground': a.teal,
+
+    // -- Chat and inline chat -----------------------------------------------
+    // Fixed colours in VS Code too: unset, slash commands render in stock
+    // blue. Chat lives in the side bar or panel, so it sits on the mantle.
+    'chat.requestBackground': alpha(n.surface0, 0.5),
+    'chat.requestBorder': alpha(n.surface1, 0.8),
+    'chat.slashCommandBackground': alpha(a.teal, 0.14),
+    'chat.slashCommandForeground': tealOnTint,
+    'chat.avatarBackground': n.surface1,
+    'chat.avatarForeground': n.text,
+    'chat.editedFileForeground': a.amber,
+    'chat.linesAddedForeground': a.green,
+    'chat.linesRemovedForeground': st.red,
+    'inlineChat.background': n.elevated,
+    'inlineChat.foreground': n.text,
+    'inlineChat.border': n.surface1,
+    'inlineChat.shadow': shadow,
+    'inlineChatInput.background': isDark ? n.crust : n.base,
+    'inlineChatInput.border': n.surface1,
+    'inlineChatInput.focusBorder': alpha(a.teal, 0.7),
+    'inlineChatInput.placeholderForeground': n.muted,
+    'inlineChatDiff.inserted': alpha(added, t.diff),
+    'inlineChatDiff.removed': alpha(removed, t.diff),
 
     // -- Git / SCM ----------------------------------------------------------
     'gitDecoration.addedResourceForeground': a.green,
@@ -559,10 +636,10 @@ function buildTheme(variant) {
     'settings.checkboxBackground': n.elevated,
     'settings.checkboxForeground': a.teal,
     'settings.checkboxBorder': n.surface1,
-    'settings.textInputBackground': isDark ? n.crust : n.surface0,
+    'settings.textInputBackground': isDark ? n.crust : n.base,
     'settings.textInputForeground': n.text,
     'settings.textInputBorder': n.surface1,
-    'settings.numberInputBackground': isDark ? n.crust : n.surface0,
+    'settings.numberInputBackground': isDark ? n.crust : n.base,
     'settings.numberInputForeground': a.apricot,
     'settings.numberInputBorder': n.surface1,
     'settings.focusedRowBackground': alpha(n.surface0, 0.6),
@@ -579,13 +656,13 @@ function buildTheme(variant) {
     'walkThrough.embeddedEditorBackground': n.crust,
 
     'extensionButton.prominentBackground': a.teal,
-    'extensionButton.prominentForeground': isDark ? n.crust : n.base,
+    'extensionButton.prominentForeground': onAccent,
     'extensionButton.prominentHoverBackground': mix(a.teal, n.bright, 0.15),
     'extensionButton.background': a.teal,
-    'extensionButton.foreground': isDark ? n.crust : n.base,
+    'extensionButton.foreground': onAccent,
     'extensionButton.hoverBackground': mix(a.teal, n.bright, 0.15),
     'extensionBadge.remoteBackground': a.teal,
-    'extensionBadge.remoteForeground': isDark ? n.crust : n.base,
+    'extensionBadge.remoteForeground': onAccent,
     'extensionIcon.starForeground': a.amber,
     'extensionIcon.verifiedForeground': a.teal,
     'extensionIcon.preReleaseForeground': a.orchid,
@@ -749,6 +826,21 @@ function buildTheme(variant) {
         'entity.name.constant',
       ],
       settings: { foreground: a.apricot },
+    },
+    {
+      // The JS/TS grammar scopes every `const` binding as a constant, but the
+      // TypeScript server marks the same bindings `variable.readonly`, which
+      // the semantic layer above draws as plain variables. Matching that here
+      // keeps the first paint, and TS inside Markdown fences, from showing
+      // half the file in apricot and then flipping.
+      name: 'JS and TS const bindings — plain variables, as the semantic layer draws them',
+      scope: [
+        'variable.other.constant.ts',
+        'variable.other.constant.tsx',
+        'variable.other.constant.js',
+        'variable.other.constant.jsx',
+      ],
+      settings: { foreground: n.text },
     },
     {
       name: 'Numbers',

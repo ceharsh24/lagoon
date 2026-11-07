@@ -624,9 +624,11 @@ const html = `<!doctype html>
       theme if any accent drops below 4.5:1, or if any two accents land closer than ΔE 22 —
       close enough that two different roles would start to look like the same colour. The eight
       syntax hues are authored in OKLCH and share one perceptual lightness band: none may outshine
-      body text, and the brightest may exceed the dimmest by at most 1.35×. Red sits outside the
-      band on purpose — it marks broken code and nothing else, urgent through saturation rather
-      than glow.</p>
+      body text, and the brightest may exceed the dimmest by at most 1.35×. Inside that band the
+      hues sit a few lightness points apart, so they stay distinct for viewers with red–green
+      colour blindness too — the build simulates it and holds every pair apart. Red sits outside
+      the band on purpose — it marks broken code and nothing else, urgent through saturation
+      rather than glow.</p>
     ${`<div class="swatches">${renderSwatches(D)}</div>`}
   </div>
 </section>

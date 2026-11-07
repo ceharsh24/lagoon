@@ -1,5 +1,37 @@
 # Changelog
 
+## Unreleased
+
+An accessibility pass. 1.1 audited the palette against the editor background; the theme is
+now audited as VS Code draws it — about 220 foreground/background pairs per variant, each on the
+surface it actually sits on — and that turned up problems the palette checks could not see.
+
+- **Accents stay distinct with colour blindness.** The flat brightness band from 1.1 left hue as
+  the only cue, and red–green colour blindness removes half of it: keywords and properties
+  (lavender, sky) and numbers and types (apricot, amber) were near-identical. Small lightness
+  offsets inside the band raise the closest pair from ΔE2000 2.3 to 4.9 on Lagoon, 2.7 to 4.5 on
+  Soft and 1.7 to 3.6 on Dawn, and the audit now enforces a floor. The 1.35× band and the
+  no-brighter-than-text ceiling still hold.
+- **Terminal greys are readable.** Bright black — shell autosuggestions, dimmed tool output — sat
+  at 2:1; it now uses the comment colour. Dawn no longer swaps black and white, which had made
+  black and bright black the same pale grey.
+- **Keyboard focus is visible in lists.** A focused row had the same fill as a selected one and
+  no outline, so in a multi-select list you could not see where focus was. Focus is now a teal
+  outline.
+- **Secondary text holds 4.5:1 on widgets.** Descriptions, inlay hints and suggest-widget status
+  lines used comment grey, which only clears 4.5:1 on the editor itself.
+- **Highlights no longer swamp what they highlight.** The find match was a 40% apricot wash, so
+  searching for a number made the number illegible. Selection and find fills are now capped so
+  every token, comments included, keeps 3:1 on them; the find match keeps its border.
+- **Dawn:** a visible current-line highlight, inputs on the editor's near-white, darker text for
+  inactive tabs on the frame, and a deeper teal for match highlights on a selected row.
+- The minimap, Copilot chat and inline chat, and toolbars had no colours set and fell back to
+  VS Code's stock blue and orange; they now follow the palette.
+- JS/TS `const` bindings render as plain variables in both the grammar and the semantic layer,
+  so they no longer flash apricot before the language server loads.
+- `npm run build` now writes nothing unless every variant passes, as the README always said.
+- Soft's error red lifted slightly so error text clears 4.5:1 on its widgets.
+
 ## 1.1.0 — 2026-08-01
 
 A comfort pass on every variant, aimed at long sessions. 1.0 audited only a contrast *floor*;
@@ -27,6 +59,8 @@ over hours.
 - Bracket-pair colours pulled 30% toward the text colour: structure hints, not tokens.
 - `bright` softened from 15.9:1 to 14:1; Dawn's accent chroma equalised (lavender was
   electric-violet at 0.212 while teal sat muted at 0.084 — both now near 0.12).
+
+## 1.0.1 — 2026-07-26
 
 Documentation only. The three theme files are byte-identical to 1.0.0, so nothing changes in the
 editor — this exists to correct the install instructions and to publish the usage docs, which can

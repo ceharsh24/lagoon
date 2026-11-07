@@ -58,27 +58,31 @@ feels like.
 
 | Role | Colour | Dark | Dawn |
 | --- | --- | --- | --- |
-| Functions, methods, decorators, UI accent | teal | `#4dccb8` | `#087970` |
-| Properties, object keys, tag attributes | sky | `#69b7ed` | `#126aa4` |
-| Keywords, control flow, storage | lavender | `#bda6f6` | `#6b58ad` |
+| Functions, methods, decorators, UI accent | teal | `#4dccb8` | `#04786e` |
+| Properties, object keys, tag attributes | sky | `#60ade3` | `#01619a` |
+| Keywords, control flow, storage | lavender | `#c7b0ff` | `#6f5db2` |
 | Imports, language constants, regex | orchid | `#dd8ec7` | `#933f74` |
 | `this` / self, HTML tags, markdown lists | rose | `#f495a1` | `#a74955` |
-| Numbers, constants, enum members | apricot | `#eda26a` | `#a8572d` |
-| Types, classes, interfaces | amber | `#d1b157` | `#856103` |
-| Strings | green | `#80c182` | `#33753d` |
+| Numbers, constants, enum members | apricot | `#efa46c` | `#a4542a` |
+| Types, classes, interfaces | amber | `#c4a44a` | `#835f03` |
+| Strings | green | `#85c587` | `#33753d` |
 | Errors, invalid, deletions | red | `#e76761` | `#a01819` |
 | Comments, ghost text | muted, italic | `#817cab` | `#6d6996` |
 | Punctuation, operators, parameters | subtle | `#9d9bbf` | `#575676` |
 
-Accents are authored in OKLCH and share one perceptual lightness band per variant
-(±1.5 L), so no token glows above another — hue carries the meaning, brightness
-stays flat. Red is a state, not a syntax colour: it sits below the band and gets
+Accents are authored in OKLCH and share one perceptual lightness band per variant,
+so no token glows above body text or far above another — hue carries the meaning.
+The band is deliberately not perfectly flat: with every accent at one lightness,
+red–green colour blindness leaves keywords and properties (lavender, sky) and
+numbers and types (apricot, amber) looking identical, so those pairs sit a few
+lightness points apart. Red is a state, not a syntax colour: it sits below the band and gets
 its urgency from chroma, so error squiggles read as errors and nothing else
 borrows their colour.
 
 ## Contrast is enforced, not eyeballed
 
-`npm run build` refuses to write a theme that fails its own audit:
+`npm run build` refuses to write a theme that fails its own audit. The first checks hold the
+palette against the editor background:
 
 - Body text must clear **7:1** (WCAG AAA) against the editor background — code is read for hours.
 - Every accent must clear **4.5:1** (AA). Accents carry meaning through hue as well as luminance,
@@ -93,8 +97,24 @@ borrows their colour.
   and uneven glow is what makes a theme tiring over hours.
 - The `faint` step (line numbers, active indent guide) must clear **3:1** — quiet, but readable
   without leaning in.
+- No two accents may land closer than **ΔE2000 3.5** as someone with protanopia or deuteranopia
+  sees them (simulated with Machado et al., 2009). About one man in twelve has red–green
+  colour-vision deficiency, and a flat brightness band is the worst case for them.
 
-Current numbers, dark variant: body text 12.3:1, accents 7.5–9.1:1, closest accent pair ΔE 23.
+A palette can pass all of that while the theme fails — comment grey clears 4.5:1 on the editor
+and not on a hover widget — so the audit then checks the theme **as VS Code draws it**: about
+220 foreground/background pairs per variant, with translucent colours flattened onto the
+surface beneath them.
+
+- UI text — tabs, side bar, status bar, list rows, widgets, inputs — must clear **4.5:1** on its
+  own surface; icons and deliberately quiet text (line numbers, ignored files) **3:1**.
+- Every token keeps its floor on the **current-line highlight**, where you are typing.
+- Every token, comments included, keeps **3:1** on a selection, find match, or word highlight.
+- Terminal colours must clear **4.5:1** on the terminal background, bright black included —
+  it is what shell autosuggestions and dimmed tool output are drawn in.
+
+Current numbers, dark variant: body text 12.3:1, accents 7.4–9.5:1, closest accent pair ΔE 23,
+closest pair under colour blindness ΔE2000 4.9.
 
 ## Install
 
@@ -244,8 +264,9 @@ npm run preview   # regenerate docs/index.html
 | --- | --- |
 | `src/palette.js` | the three variants — neutrals in HSL, accents in OKLCH |
 | `src/theme.js` | role assignments — which token gets which colour, ~350 UI keys |
-| `src/contrast.js` | WCAG contrast and CIELAB ΔE |
-| `src/build.js` | generates `themes/*.json`, runs the audit |
+| `src/contrast.js` | WCAG contrast, CIELAB ΔE and CIEDE2000, colour-blindness simulation |
+| `src/audit.js` | the audit — palette floors, drawn colour pairs, colour-blind distance |
+| `src/build.js` | runs the audit, then writes `themes/*.json` if every variant passes |
 | `src/preview.js` | generates `docs/index.html`, the GitHub Pages site |
 
 Token roles are defined once in `src/theme.js` and shared across all three variants, so the
